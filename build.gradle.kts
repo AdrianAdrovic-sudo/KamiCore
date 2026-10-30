@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.kamismp"
-version = "1.0.0"
+version = "1.1.0"
 
 repositories {
     mavenCentral()
@@ -22,7 +22,7 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 tasks.processResources {
-    // Puts the version from above (1.0.0) into plugin.yml automatically.
+    // Puts the version from above into plugin.yml automatically.
     val props = mapOf("version" to project.version)
     inputs.properties(props)
     filesMatching("plugin.yml") {

@@ -44,8 +44,11 @@ public final class KamiCoreCommand implements BasicCommand {
         line(sender, "/kiaccept, /kideny", "answer a ki sense request");
         line(sender, "/nimbus", "ride the Flying Nimbus (toggle)");
         line(sender, "/senzu", "full heal + food (long cooldown)");
-        line(sender, "/gravity", "gravity chamber training for XP");
-        line(sender, "/kaioken", "huge power boost (1 day cooldown)");
+        line(sender, "/gravity [10x|50x|100x|300x]", "gravity chamber training for XP");
+        line(sender, "/kaioken [x2|x3|x10|x20]", "power boost that costs health");
+        line(sender, "/kamehameha", "charge (hold Shift), release to fire");
+        line(sender, "/solarflare", "blind everyone who is looking at you");
+        line(sender, "/scouter [player]", "power levels and locations");
         if (sender.hasPermission("kamicore.admin")) {
             line(sender, "/kamicore reload", "reload config.yml");
         }

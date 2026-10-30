@@ -30,16 +30,122 @@ nimbus:
 senzu:
   cooldown: 43200          # 12 hours
 
-# /gravity - gravity chamber training for XP
+# /gravity [level] - gravity chamber training for XP
+# slowness / mining-fatigue / hunger = effect level (0 = none)
 gravity:
-  cooldown: 1800           # 30 minutes
-  duration: 60             # how long the training lasts
-  xp-reward: 150           # XP points (not levels) given at the end
+  default-level: 50x       # used when you type just /gravity
+  levels:
+    10x:
+      duration: 45
+      xp: 60
+      slowness: 1
+      mining-fatigue: 1
+      hunger: 0
+      cooldown: 600        # 10 minutes
+    50x:
+      duration: 60
+      xp: 150
+      slowness: 2
+      mining-fatigue: 1
+      hunger: 0
+      cooldown: 1200       # 20 minutes
+    100x:
+      duration: 60
+      xp: 300
+      slowness: 3
+      mining-fatigue: 2
+      hunger: 1
+      cooldown: 1800       # 30 minutes
+    300x:
+      duration: 90
+      xp: 800
+      slowness: 5
+      mining-fatigue: 3
+      hunger: 2
+      cooldown: 3600       # 1 hour
 
-# /kaioken - big strength boost, then your body strains
+# /kaioken [level] - Strength + Speed, then the body pays for it
+# health-cost = part of your MAX health you lose when it ends (0.5 = half)
 kaioken:
-  cooldown: 86400          # 24 hours
-  duration: 60
-  strength-level: 2        # Strength II
-  speed-level: 2           # Speed II
-  strain-duration: 20      # Weakness + Slowness after it ends
+  default-level: x2
+  minimum-health-left: 1.0 # Kaioken never kills you: you keep at least this much HP (1.0 = half a heart)
+  levels:
+    x2:
+      strength: 1
+      speed: 1
+      duration: 60
+      health-cost: 0.15
+      strain: 15           # seconds of Weakness + Slowness afterwards
+      cooldown: 43200      # 12 hours
+    x3:
+      strength: 2
+      speed: 2
+      duration: 45
+      health-cost: 0.30
+      strain: 25
+      cooldown: 64800      # 18 hours
+    x10:
+      strength: 3
+      speed: 2
+      duration: 30
+      health-cost: 0.55
+      strain: 40
+      cooldown: 86400      # 24 hours
+    x20:
+      strength: 4
+      speed: 3
+      duration: 20
+      health-cost: 0.80
+      strain: 60
+      cooldown: 86400      # 24 hours
+
+# /kamehameha - the longer you charge, the higher the level
+# charge = seconds of charging needed to reach the level
+# damage = 2 per heart, radius = blast area at the impact point (0 = no blast)
+kamehameha:
+  cancel-on-hit: true      # getting hit while charging breaks your focus
+  max-hold: 4              # seconds you can hold a full charge before it fires by itself
+  levels:
+    "1":
+      charge: 0
+      damage: 4
+      range: 15
+      radius: 0
+      knockback: 0.4
+      cooldown: 20
+    "2":
+      charge: 1.5
+      damage: 8
+      range: 25
+      radius: 1.5
+      knockback: 0.8
+      cooldown: 60
+    "3":
+      charge: 3
+      damage: 13
+      range: 35
+      radius: 2.5
+      knockback: 1.2
+      cooldown: 120
+    "4":
+      charge: 5
+      damage: 20
+      range: 50
+      radius: 4
+      knockback: 1.8
+      cooldown: 300
+
+# /solarflare - blinds nearby players who can see you
+solarflare:
+  cooldown: 300            # 5 minutes
+  radius: 10
+  blind-seconds: 5
+  require-line-of-sight: true   # walls protect you
+  must-face-caster: true        # players looking away are safe
+  affect-mobs: true             # mobs lose their target and slow down
+
+# /scouter - read power levels
+scouter:
+  cooldown: 15
+  show-coordinates: true
+  notify-target: true      # tell players when someone scans them

@@ -29,6 +29,15 @@ permissions:
   kamicore.kaioken:
     description: Use Kaioken
     default: true
+  kamicore.kamehameha:
+    description: Charge and fire a Kamehameha
+    default: true
+  kamicore.solarflare:
+    description: Use Solar Flare
+    default: true
+  kamicore.scouter:
+    description: Read power levels and locations with the Scouter
+    default: true
   kamicore.admin:
     description: Reload the plugin
     default: op

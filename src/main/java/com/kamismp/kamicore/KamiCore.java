@@ -2,13 +2,16 @@ package com.kamismp.kamicore;
 
 import com.kamismp.kamicore.commands.GravityCommand;
 import com.kamismp.kamicore.commands.KaiokenCommand;
+import com.kamismp.kamicore.commands.KamehamehaCommand;
 import com.kamismp.kamicore.commands.KamiCoreCommand;
 import com.kamismp.kamicore.commands.KiMarkCommand;
 import com.kamismp.kamicore.commands.KiResponseCommand;
 import com.kamismp.kamicore.commands.KiSenseCommand;
 import com.kamismp.kamicore.commands.NimbusCommand;
+import com.kamismp.kamicore.commands.ScouterCommand;
 import com.kamismp.kamicore.commands.SenzuCommand;
 import com.kamismp.kamicore.commands.ShunkanCommand;
+import com.kamismp.kamicore.commands.SolarFlareCommand;
 import com.kamismp.kamicore.data.DataStore;
 import com.kamismp.kamicore.listeners.PlayerListener;
 import com.kamismp.kamicore.util.Cooldowns;
@@ -29,11 +32,15 @@ public final class KamiCore extends JavaPlugin {
     private NimbusCommand nimbus;
     private GravityCommand gravity;
     private KaiokenCommand kaioken;
+    private KamehamehaCommand kamehameha;
 
     @Override
     public void onEnable() {
         // Creates plugins/KamiCore/config.yml the first time
         saveDefaultConfig();
+        // Adds settings for new features to an older config.yml without touching your changes
+        getConfig().options().copyDefaults(true);
+        saveConfig();
         Msg.setPrefix(getConfig().getString("prefix", ""));
 
         // Saved player data (ki marks + cooldowns) in plugins/KamiCore/data.yml
@@ -46,6 +53,7 @@ public final class KamiCore extends JavaPlugin {
         nimbus = new NimbusCommand(this);
         gravity = new GravityCommand(this);
         kaioken = new KaiokenCommand(this);
+        kamehameha = new KamehamehaCommand(this);
 
         // ---- Register commands: name, description, aliases, handler ----
         registerCommand("kimark", "Save, delete or list your ki marks", List.of("marks"), new KiMarkCommand(this));
@@ -57,6 +65,9 @@ public final class KamiCore extends JavaPlugin {
         registerCommand("senzu", "Eat a Senzu Bean", List.of(), new SenzuCommand(this));
         registerCommand("gravity", "Gravity chamber training", List.of("gravitytraining"), gravity);
         registerCommand("kaioken", "Use the Kaioken technique", List.of(), kaioken);
+        registerCommand("kamehameha", "Charge and fire a Kamehameha", List.of("kame"), kamehameha);
+        registerCommand("solarflare", "Blind everyone who can see you", List.of("taiyoken"), new SolarFlareCommand(this));
+        registerCommand("scouter", "Read power levels and locations", List.of(), new ScouterCommand(this));
         registerCommand("kamicore", "KamiCore help and admin", List.of("kami"), new KamiCoreCommand(this));
 
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
@@ -71,6 +82,7 @@ public final class KamiCore extends JavaPlugin {
         if (nimbus != null) nimbus.dismountAll();
         if (gravity != null) gravity.cancelAll();
         if (kaioken != null) kaioken.cancelAll();
+        if (kamehameha != null) kamehameha.cancelAll();
         if (dataStore != null) dataStore.save();
     }
 
@@ -86,4 +98,5 @@ public final class KamiCore extends JavaPlugin {
     public NimbusCommand nimbus() { return nimbus; }
     public GravityCommand gravity() { return gravity; }
     public KaiokenCommand kaioken() { return kaioken; }
+    public KamehamehaCommand kamehameha() { return kamehameha; }
 }
