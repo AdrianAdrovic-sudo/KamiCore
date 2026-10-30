@@ -1,0 +1,43 @@
+name: Build
+
+# Runs on every push. When you push a tag like v1.0.0 it also
+# creates a GitHub Release with the plugin jar attached.
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: Build plugin
+        run: |
+          chmod +x gradlew
+          ./gradlew build
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v6
+        with:
+          name: KamiCore
+          path: build/libs/*.jar
+
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" build/libs/*.jar --title "KamiCore ${{ github.ref_name }}" --generate-notes

@@ -1,0 +1,40 @@
+name: KamiCore
+version: '${version}'
+main: com.kamismp.kamicore.KamiCore
+api-version: '26.3'
+description: Dragon Ball inspired abilities for KamiSMP
+author: Adrian
+
+# Commands are registered in code (KamiCore.java), so they are not listed here.
+# Permissions are listed here so normal players get them by default.
+permissions:
+  kamicore.kimark:
+    description: Save, delete and list ki marks
+    default: true
+  kamicore.shunkan:
+    description: Instant Transmission to ki marks and coordinates
+    default: true
+  kamicore.kisense:
+    description: Send, accept and deny teleport requests
+    default: true
+  kamicore.nimbus:
+    description: Ride Flying Nimbus
+    default: true
+  kamicore.senzu:
+    description: Eat a Senzu Bean
+    default: true
+  kamicore.gravity:
+    description: Gravity chamber training
+    default: true
+  kamicore.kaioken:
+    description: Use Kaioken
+    default: true
+  kamicore.admin:
+    description: Reload the plugin
+    default: op
+  kamicore.bypass.cooldown:
+    description: Ignore all KamiCore cooldowns
+    default: op
+  kamicore.bypass.marklimit:
+    description: Save unlimited ki marks
+    default: op

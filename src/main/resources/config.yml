@@ -1,0 +1,45 @@
+# ==========================================
+#  KamiCore - Dragon Ball powers for KamiSMP
+# ==========================================
+# All times are in SECONDS.
+# After editing, run /kamicore reload (no restart needed).
+
+# Shown before every message. Uses MiniMessage colors: https://docs.advntr.dev/minimessage/format
+prefix: "<gradient:#ff8c00:#ffd700><b>KamiSMP</b></gradient> <dark_gray>»</dark_gray> "
+
+# /kimark - save locations ("ki marks") to teleport to later
+kimark:
+  max-marks: 3
+
+# /shunkan - Instant Transmission to a ki mark or coordinates
+shunkan:
+  cooldown: 30
+
+# /kisense - ask to teleport to another player
+kisense:
+  cooldown: 30
+  request-timeout: 60      # how long a request stays valid
+
+# /nimbus - toggle flying on the Flying Nimbus
+nimbus:
+  cooldown: 10
+  fly-speed: 0.1           # 0.1 = normal creative flying speed, max 1.0
+  dismount-on-hit: true    # getting hit by a mob/player knocks you off
+
+# /senzu - full heal + full hunger
+senzu:
+  cooldown: 43200          # 12 hours
+
+# /gravity - gravity chamber training for XP
+gravity:
+  cooldown: 1800           # 30 minutes
+  duration: 60             # how long the training lasts
+  xp-reward: 150           # XP points (not levels) given at the end
+
+# /kaioken - big strength boost, then your body strains
+kaioken:
+  cooldown: 86400          # 24 hours
+  duration: 60
+  strength-level: 2        # Strength II
+  speed-level: 2           # Speed II
+  strain-duration: 20      # Weakness + Slowness after it ends

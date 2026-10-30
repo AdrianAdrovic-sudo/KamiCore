@@ -1,0 +1,5 @@
+# Keep line endings correct when building on Linux (GitHub) and Windows
+* text=auto
+gradlew text eol=lf
+*.bat text eol=crlf
+*.jar binary
