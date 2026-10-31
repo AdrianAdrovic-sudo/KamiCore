@@ -1,8 +1,10 @@
 package com.kamismp.kamicore;
 
 import com.kamismp.kamicore.commands.DragonBallsCommand;
+import com.kamismp.kamicore.commands.DuelCommand;
 import com.kamismp.kamicore.commands.GravityCommand;
 import com.kamismp.kamicore.commands.KaiokenCommand;
+import com.kamismp.kamicore.commands.KaioshinCommand;
 import com.kamismp.kamicore.commands.KamiCoreCommand;
 import com.kamismp.kamicore.commands.KiAttackCommand;
 import com.kamismp.kamicore.commands.KiMarkCommand;
@@ -19,6 +21,10 @@ import com.kamismp.kamicore.data.DataStore;
 import com.kamismp.kamicore.dragonballs.DragonBallListener;
 import com.kamismp.kamicore.dragonballs.DragonBalls;
 import com.kamismp.kamicore.dragonballs.Wishes;
+import com.kamismp.kamicore.duel.DuelListener;
+import com.kamismp.kamicore.duel.Duels;
+import com.kamismp.kamicore.kaioshin.Kaioshin;
+import com.kamismp.kamicore.kaioshin.KaioshinListener;
 import com.kamismp.kamicore.ki.KiAttacks;
 import com.kamismp.kamicore.ki.KiStyle;
 import com.kamismp.kamicore.listeners.PlayerListener;
@@ -47,6 +53,8 @@ public final class KamiCore extends JavaPlugin {
     private SuperSaiyan superSaiyan;
     private DragonBalls dragonBalls;
     private Wishes wishes;
+    private Duels duels;
+    private Kaioshin kaioshin;
 
     @Override
     public void onEnable() {
@@ -73,6 +81,8 @@ public final class KamiCore extends JavaPlugin {
         wishes = new Wishes(this);
         dragonBalls = new DragonBalls(this);
         dragonBalls.load();
+        duels = new Duels(this);
+        kaioshin = new Kaioshin(this);
 
         // ---- Register commands: name, description, aliases, handler ----
         registerCommand("kimark", "Save, delete or list your ki marks", List.of("marks"), new KiMarkCommand(this));
@@ -96,10 +106,29 @@ public final class KamiCore extends JavaPlugin {
         registerCommand("ssj", "Transform into a Super Saiyan", List.of("supersaiyan", "transform"), new SuperSaiyanCommand(this));
         registerCommand("shenron", "Summon Shenron with all 7 Dragon Balls", List.of(), new ShenronCommand(this));
         registerCommand("dragonballs", "Dragon Ball admin tools", List.of(), new DragonBallsCommand(this));
+        registerCommand("duel", "Challenge a player to a duel in an arena", List.of("fight"), new DuelCommand(this));
         registerCommand("kamicore", "KamiCore help and admin", List.of("kami"), new KamiCoreCommand(this));
+
+        // Kaioshin (admin) powers
+        registerCommand("kaioshin", "Powers of the Kaioshin", List.of(), new KaioshinCommand(this, KaioshinCommand.Power.HELP));
+        registerCommand("hakai", "Erase a player (ban)", List.of(), new KaioshinCommand(this, KaioshinCommand.Power.HAKAI));
+        registerCommand("revive", "Bring back an erased player (unban)", List.of(), new KaioshinCommand(this, KaioshinCommand.Power.REVIVE));
+        registerCommand("banish", "Banish a player (kick)", List.of(), new KaioshinCommand(this, KaioshinCommand.Power.BANISH));
+        registerCommand("seal", "Seal a player with Mafuba (mute)", List.of("mafuba"), new KaioshinCommand(this, KaioshinCommand.Power.SEAL));
+        registerCommand("unseal", "Break a seal (unmute)", List.of(), new KaioshinCommand(this, KaioshinCommand.Power.UNSEAL));
+        registerCommand("timeskip", "Stop time for a player (freeze)", List.of(), new KaioshinCommand(this, KaioshinCommand.Power.TIMESKIP));
+        registerCommand("kaikai", "Kai Kai teleport", List.of(), new KaioshinCommand(this, KaioshinCommand.Power.KAIKAI));
+        registerCommand("kaiheal", "Divine healing", List.of(), new KaioshinCommand(this, KaioshinCommand.Power.KAIHEAL));
+        registerCommand("telepathy", "Speak to everyone", List.of(), new KaioshinCommand(this, KaioshinCommand.Power.TELEPATHY));
+        registerCommand("divine", "Invulnerable + flight", List.of(), new KaioshinCommand(this, KaioshinCommand.Power.DIVINE));
 
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
         getServer().getPluginManager().registerEvents(new DragonBallListener(this), this);
+        getServer().getPluginManager().registerEvents(new DuelListener(this), this);
+        getServer().getPluginManager().registerEvents(new KaioshinListener(this), this);
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            kaioshin.loadSeal(online); // in case of /reload
+        }
         nimbus.startParticleTask();
         superSaiyan.start();
         dragonBalls.start();
@@ -117,6 +146,7 @@ public final class KamiCore extends JavaPlugin {
     @Override
     public void onDisable() {
         // Clean up so nobody keeps flying / keeps effects after a restart
+        if (duels != null) duels.endAll();
         if (nimbus != null) nimbus.dismountAll();
         if (gravity != null) gravity.cancelAll();
         if (kaioken != null) kaioken.cancelAll();
@@ -145,4 +175,6 @@ public final class KamiCore extends JavaPlugin {
     public SuperSaiyan superSaiyan() { return superSaiyan; }
     public DragonBalls dragonBalls() { return dragonBalls; }
     public Wishes wishes() { return wishes; }
+    public Duels duels() { return duels; }
+    public Kaioshin kaioshin() { return kaioshin; }
 }

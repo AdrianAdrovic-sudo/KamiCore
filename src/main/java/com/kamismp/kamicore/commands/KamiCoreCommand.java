@@ -53,9 +53,13 @@ public final class KamiCoreCommand implements BasicCommand {
         line(sender, "/scouter [player]", "power levels and locations");
         line(sender, "/scouter dragonballs", "Dragon Radar: find the nearest ball");
         line(sender, "/shenron", "summon the dragon with all 7 balls");
+        line(sender, "/duel [player]", "fight someone in a walled arena");
         if (sender.hasPermission("kamicore.admin")) {
             line(sender, "/kamicore reload", "reload config.yml");
             line(sender, "/dragonballs status|scatter|give", "Dragon Ball admin tools");
+        }
+        if (sender.hasPermission("kamicore.kaioshin")) {
+            line(sender, "/kaioshin", "list the powers of the Kaioshin");
         }
     }
 

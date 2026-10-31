@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.0] - 2026-10-31
+
+### Added
+- **Ki costs XP:** every ki attack level costs XP points (`xp-cost`). If you can't pay for the level you charged, the highest level you can afford fires instead; with no ki left the attack fizzles out.
+- **Duels** (`/duel <player>`, accept, deny, forfeit): both players are teleported into a square arena (30×30 by default) with a private red world border only they can see. There's a 3-2-1 countdown, no outside interference, and teleports out are blocked. Death or quitting ends it, the loser keeps their items (configurable), and both return to where they were.
+- **Kaioshin**, the admin role (`kamicore.kaioshin`): `/hakai` (ban), `/revive` (unban), `/banish` (kick), `/seal` and `/unseal` (mute, saved across relogs), `/timeskip` (freeze), `/kaikai` (teleport), `/kaiheal` (heal), `/telepathy` (announcement), `/divine` (god mode), `/kaioshin` (help).
+- New permissions: `kamicore.duel`, `kamicore.kaioshin`, `kamicore.bypass.kicost`.
+
 ## [2.1.0] - 2026-10-31
 
 ### Added

@@ -56,6 +56,17 @@ permissions:
   kamicore.shenron:
     description: Summon Shenron with the Dragon Balls
     default: true
+  kamicore.duel:
+    description: Challenge players to duels
+    default: true
+  kamicore.kaioshin:
+    description: The Kaioshin role - all admin powers (hakai, banish, seal, timeskip...)
+    default: op
+    children:
+      kamicore.admin: true
+  kamicore.bypass.kicost:
+    description: Ki attacks cost no XP
+    default: op
   kamicore.admin:
     description: Reload the plugin and use /dragonballs
     default: op

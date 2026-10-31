@@ -44,8 +44,10 @@ public final class KiAttacks {
 
     /** One charge level read from config.yml. */
     public record Level(int number, double chargeSeconds, double damage, double range, double radius,
-                        double knockback, double crater, long cooldown) {
+                        double knockback, double crater, long cooldown, int xpCost) {
     }
+
+    public static final String BYPASS_COST = "kamicore.bypass.kicost";
 
     /**
      * How much a player's state boosts their ki attacks right now.
@@ -109,6 +111,11 @@ public final class KiAttacks {
         if (!plugin.cooldowns().checkReady(player, style.id(), style.displayName())) {
             return;
         }
+        if (!canPay(player, levels.get(0).xpCost())) {
+            Msg.send(player, "<red>Not enough ki!</red> <gray>A " + style.displayName() + " needs at least <yellow>"
+                    + levels.get(0).xpCost() + " XP</yellow>.");
+            return;
+        }
         startCharging(player, style, levels);
     }
 
@@ -170,7 +177,9 @@ public final class KiAttacks {
 
                 drawCharge(player, style, charge.levelIndex, levels.size(), power(player));
                 String extra = helpers > 0 ? " <green>+" + helpers + " helping" : "";
-                Msg.actionBar(player, chargeBar(style, charge.levelIndex, levels.size()) + extra);
+                int cost = levels.get(charge.levelIndex).xpCost();
+                String costText = cost <= 0 ? "" : (canPay(player, cost) ? " <gray>(" + cost + " XP)" : " <red>(" + cost + " XP: not enough ki!)");
+                Msg.actionBar(player, chargeBar(style, charge.levelIndex, levels.size()) + costText + extra);
             }
         }.runTaskTimer(plugin, 0L, 2L);
     }
@@ -211,6 +220,18 @@ public final class KiAttacks {
         flyingBombs.clear();
     }
 
+    /** Ki costs XP points. Players with the bypass permission fight for free. */
+    private static boolean canPay(Player player, int cost) {
+        return cost <= 0 || player.hasPermission(BYPASS_COST) || player.calculateTotalExperiencePoints() >= cost;
+    }
+
+    private static void pay(Player player, int cost) {
+        if (cost <= 0 || player.hasPermission(BYPASS_COST)) {
+            return;
+        }
+        player.setExperienceLevelAndProgress(Math.max(0, player.calculateTotalExperiencePoints() - cost));
+    }
+
     /** Works out the current boost from Super Saiyan + Kaioken. */
     public Power power(Player player) {
         double ssj = plugin.superSaiyan().kiMultiplier(player);
@@ -235,20 +256,32 @@ public final class KiAttacks {
         charge.task.cancel();
         player.removePotionEffect(PotionEffectType.SLOWNESS);
 
-        Level base = charge.levels.get(Math.min(charge.levelIndex, charge.levels.size() - 1));
-        boolean isMax = base.number() == charge.levels.size();
         KiStyle style = charge.style;
+
+        // Fire the highest level you charged AND can pay for
+        int index = Math.min(charge.levelIndex, charge.levels.size() - 1);
+        while (index >= 0 && !canPay(player, charge.levels.get(index).xpCost())) {
+            index--;
+        }
+        if (index < 0) {
+            Msg.send(player, "<red>Your ki runs dry and the " + style.displayName() + " fizzles out!</red> <gray>(not enough XP)");
+            return;
+        }
+        Level base = charge.levels.get(index);
+        boolean isMax = base.number() == charge.levels.size();
+        pay(player, base.xpCost());
 
         // Super Saiyan / Kaioken make the attack stronger, bigger and longer
         Power power = power(player);
         Level level = new Level(base.number(), base.chargeSeconds(), base.damage() * power.damage(), base.range() * power.range(),
                 base.radius() * power.size(), base.knockback() * (1 + (power.size() - 1) * 0.5), base.crater() * power.size(),
-                base.cooldown());
+                base.cooldown(), base.xpCost());
 
         plugin.cooldowns().start(player, style.id(), base.cooldown());
         String shout = isMax ? "<b>" + style.shout() + "</b>" : style.shout();
         String boost = power.damage() > 1 ? " <gold>x" + String.format(java.util.Locale.ROOT, "%.1f", power.damage()) + " power</gold>" : "";
-        Msg.send(player, "<aqua>" + shout + "</aqua> <gray>(" + style.displayName() + " level <yellow>" + level.number() + "</yellow>)" + boost);
+        String paid = base.xpCost() > 0 && !player.hasPermission(BYPASS_COST) ? " <red>-" + base.xpCost() + " XP</red>" : "";
+        Msg.send(player, "<aqua>" + shout + "</aqua> <gray>(" + style.displayName() + " level <yellow>" + level.number() + "</yellow>)" + boost + paid);
 
         switch (style.type()) {
             case BEAM -> fireBeam(player, style, level, power);
@@ -545,13 +578,14 @@ public final class KiAttacks {
                 continue;
             }
             raw.add(new Level(0, s.getDouble("charge", 0), s.getDouble("damage", 4), s.getDouble("range", 20),
-                    s.getDouble("radius", 0), s.getDouble("knockback", 0.5), s.getDouble("crater", 0), s.getLong("cooldown", 30)));
+                    s.getDouble("radius", 0), s.getDouble("knockback", 0.5), s.getDouble("crater", 0), s.getLong("cooldown", 30),
+                    Math.max(0, s.getInt("xp-cost", 0))));
         }
         raw.sort(Comparator.comparingDouble(Level::chargeSeconds));
         List<Level> numbered = new ArrayList<>();
         for (int i = 0; i < raw.size(); i++) {
             Level l = raw.get(i);
-            numbered.add(new Level(i + 1, l.chargeSeconds(), l.damage(), l.range(), l.radius(), l.knockback(), l.crater(), l.cooldown()));
+            numbered.add(new Level(i + 1, l.chargeSeconds(), l.damage(), l.range(), l.radius(), l.knockback(), l.crater(), l.cooldown(), l.xpCost()));
         }
         return numbered;
     }

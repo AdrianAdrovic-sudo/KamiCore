@@ -51,7 +51,7 @@ Every attack charges up through 4 levels. Hold **Shift** while charging and rele
 | 🌀 **Special Beam Cannon** | `/specialbeamcannon` | Spiral beam that **pierces** mobs, players and blocks | 11 ❤ to everything in a 70-block line |
 | ⚪ **Spirit Bomb** | `/spiritbomb` | Giant flying energy ball; **friends hold Shift to help charge it** | 16 ❤, blast radius 7, crater 8 |
 
-Getting hit while charging breaks your focus. Chests, obsidian and bedrock survive explosions by default.
+Every level **costs XP (ki)**: from 5 XP for a quick Kamehameha up to 160 XP for a full Spirit Bomb. If you can't afford the level you charged, the strongest level you *can* pay for fires instead. Getting hit while charging breaks your focus. Chests, obsidian and bedrock survive explosions by default.
 
 ### 🐉 Dragon Balls & Shenron
 - **7 glowing Dragon Balls** are hidden across the world, up to 1,500 blocks from spawn.
@@ -67,6 +67,27 @@ Getting hit while charging breaks your focus. Chests, obsidian and bedrock survi
 | ⭐ Unlimited Power | No cooldowns on any ability for 1 hour |
 
 After a wish the balls **turn to stone for 24 hours**, then scatter again. Each cycle has a unique ID, so leftover or duplicated balls are worthless. Balls lost in the void fly to a new hiding place.
+
+### ⚔️ Duels
+Challenge anyone with **`/duel <player>`**. When they accept, you're both teleported into a **30×30 arena with a real red border** that only the two of you can see. After a *3, 2, 1, FIGHT!* countdown, it's a fight to the finish:
+- nobody else can hurt you, and you can't hurt them
+- ender pearls, `/shunkan`, `/tpa` and other escapes are blocked
+- the loser keeps their items, and both players are sent back to where they were
+
+### 👼 Kaioshin: the admin role
+Admins are the **Kaioshin**, with god powers themed after the Supreme Kais:
+
+| Power | Command | Does |
+|---|---|---|
+| 💀 Hakai | `/hakai <player> [reason]` | Erases the player in a purple flash (ban) |
+| 🐉 Revive | `/revive <player>` | Brings them back (unban) |
+| ⚡ Banish | `/banish <player> [reason]` | Lightning strike and kick |
+| 🫙 Mafuba | `/seal <player> [minutes]` · `/unseal` | Seals them in the jar (mute), survives relogs |
+| ⏱️ Time Skip | `/timeskip <player>` | Stops time for them (freeze) |
+| ✨ Kai Kai | `/kaikai <player> [here]` | Teleports to a player or brings them over |
+| 💚 Healing | `/kaiheal [player]` | Full heal and cleanse |
+| 🧠 Telepathy | `/telepathy <message>` | Server-wide announcement |
+| 😇 Divine | `/divine` | Invulnerable and flying |
 
 ### 🔴 Kaioken & 🏋️ Gravity Chamber
 - **Kaioken x2, x3, x10 and x20**: more Strength and Speed per level, and ki attacks up to 1.8× stronger with a red aura. You lose 15–80% of your max health when it ends.
@@ -93,6 +114,7 @@ Ki marks you can teleport to, coordinate teleports, clickable teleport requests,
 | `/spiritbomb` | `/genkidama` | Gather energy for a Spirit Bomb |
 | `/scouter [player\|dragonballs]` | | Scan power levels, or track Dragon Balls |
 | `/shenron` | | Summon Shenron with all 7 Dragon Balls |
+| `/duel <player>\|accept\|deny\|forfeit` | `/fight` | Arena duels |
 | `/kaioken [x2\|x3\|x10\|x20]` | | Power boost that costs health |
 | `/gravity [10x\|50x\|100x\|300x\|stop]` | | Gravity training for XP |
 | `/solarflare` | `/taiyoken` | Blind everyone looking at you |
@@ -103,6 +125,7 @@ Ki marks you can teleport to, coordinate teleports, clickable teleport requests,
 | `/senzu` | | Full health and hunger |
 | `/kamicore [reload]` | `/kami` | Help, or reload the config |
 | `/dragonballs status\|scatter\|give` | | Admin: manage the Dragon Balls |
+| `/kaioshin` | | Kaioshin: list all admin powers (see above) |
 
 All commands have tab-completion.
 
@@ -111,7 +134,9 @@ All commands have tab-completion.
 | Permission | Default | Description |
 |---|:---:|---|
 | `kamicore.<command>` | everyone | Use that ability (e.g. `kamicore.finalflash`, `kamicore.supersaiyan`) |
+| `kamicore.kaioshin` | op | The Kaioshin role: every admin power (includes `kamicore.admin`) |
 | `kamicore.admin` | op | `/kamicore reload` and `/dragonballs` |
+| `kamicore.bypass.kicost` | op | Ki attacks cost no XP |
 | `kamicore.bypass.cooldown` | op | Ignore all cooldowns |
 | `kamicore.bypass.marklimit` | op | Unlimited ki marks |
 
@@ -159,6 +184,8 @@ KamiCore is written in **Java 25** against the **Paper API**, with no dependenci
 - **Ki flight:** elytra-style gliding without an elytra, kept alive by cancelling `EntityToggleGlideEvent` and steered with a per-tick velocity that eases toward the look direction.
 - **Super Saiyan:** a single repeating task handles auras and XP drain (`calculateTotalExperiencePoints`). Extra hearts come from namespaced **attribute modifiers**, and the colored glow uses **scoreboard teams**. The player's previous team is restored afterwards, and leftovers are cleaned up after a crash.
 - **Dragon Balls:** balls are **ItemDisplay + Interaction entities** tagged with the **Persistent Data Container**. Chunks load asynchronously (`getChunkAtAsync`) so scattering never freezes the server, a **cycle ID** makes duplicated balls worthless, and stale entities are purged on `EntitiesLoadEvent`. Lost items re-scatter themselves.
+- **Duel arenas:** per-player `WorldBorder` objects give each duelist a private, client-enforced wall, backed by server-side move and teleport checks. Damage events resolve projectile shooters so outsiders can't interfere.
+- **Thread safety:** the mute check runs on Paper's async chat thread, so seal data lives in a `ConcurrentHashMap`, persisted to YAML.
 - **Custom inventory GUI:** Shenron's wish menu is a custom `InventoryHolder`, with all clicks and drags handled safely.
 - **Persistence:** YAML storage keyed by player UUID for cooldowns, timed wishes (re-applied on join) and Dragon Ball state.
 - **CI/CD:** GitHub Actions builds every push. Pushing a version tag publishes a release with the compiled jar.
@@ -176,6 +203,8 @@ src/main/java/com/kamismp/kamicore/
 ├── saiyan/
 │   ├── SuperSaiyan.java          # Transformations, XP drain, auras, teams, attribute modifiers
 │   └── SaiyanForm.java           # A form loaded from config
+├── duel/                         # Duels: arena, borders, rules
+├── kaioshin/                     # Admin powers: seals, time skip, divine mode
 ├── dragonballs/
 │   ├── DragonBalls.java          # Scattering, collecting, cycles, radar data
 │   ├── Wishes.java               # Shenron summoning and the 4 wishes
@@ -214,6 +243,7 @@ The jar is created in `build/libs/`.
 - [x] **1.1.0:** Kamehameha, Solar Flare, Scouter, Kaioken levels, Gravity levels
 - [x] **2.0.0:** Super Saiyan forms, Final Flash, Galick Gun, Special Beam Cannon, Spirit Bomb, terrain destruction, Dragon Balls and Shenron
 - [x] **2.1.0:** Elytra-style ki flight; forms and Kaioken power up ki attacks
+- [x] **2.2.0:** Ki attacks cost XP, arena duels, Kaioshin admin powers
 
 See [CHANGELOG.md](CHANGELOG.md) for details.
 

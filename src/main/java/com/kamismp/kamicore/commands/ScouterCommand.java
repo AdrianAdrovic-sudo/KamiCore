@@ -108,6 +108,9 @@ public final class ScouterCommand implements BasicCommand {
         if (gravity != null) {
             line(viewer, "Status", "<dark_red>Training in " + gravity.toUpperCase(Locale.ROOT) + " gravity");
         }
+        if (plugin.duels().isInDuel(target)) {
+            line(viewer, "Status", "<gold>In a duel");
+        }
         if (plugin.nimbus().isRiding(target)) {
             line(viewer, "Status", "<yellow>Riding the Flying Nimbus");
         }
