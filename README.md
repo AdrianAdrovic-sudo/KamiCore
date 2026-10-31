@@ -5,7 +5,7 @@
 ### Dragon Ball powers for Minecraft
 
 A custom Paper plugin built from scratch for **KamiSMP**, a Dragon Ball inspired survival server.<br>
-Charge a Kamehameha, push your body with Kaioken, train under 300x gravity and Instant Transmission across the map.
+Transform into a Super Saiyan, blast craters with a Final Flash, hunt the 7 Dragon Balls and make a wish to Shenron.
 
 [![Build](https://github.com/AdrianAdrovic-sudo/KamiCore/actions/workflows/build.yml/badge.svg)](https://github.com/AdrianAdrovic-sudo/KamiCore/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/v/release/AdrianAdrovic-sudo/KamiCore?color=orange&label=release)](https://github.com/AdrianAdrovic-sudo/KamiCore/releases/latest)
@@ -22,64 +22,84 @@ Charge a Kamehameha, push your body with Kaioken, train under 300x gravity and I
 
 ## ✨ Features
 
-### 🔵 Kamehameha
-The longer you charge, the stronger it gets. Hold **Shift** while charging and release to fire, or type the command again.
+### 🟡 Super Saiyan: 7 transformations
+Every form drains your **XP as ki** each second. Higher forms give bigger buffs, more hearts and flight, but burn through your XP faster. When it runs out, you power down.
 
-| Level | Charge time | Damage | Range | Blast radius |
-|:---:|:---:|:---:|:---:|:---:|
-| 1 | instant | 2 ❤ | 15 blocks | – |
-| 2 | 1.5 s | 4 ❤ | 25 blocks | 1.5 |
-| 3 | 3 s | 6.5 ❤ | 35 blocks | 2.5 |
-| 4 | 5 s | 10 ❤ | 50 blocks | 4 |
+| Form | Command | Glow | XP drain | Buffs | Extra hearts | Special |
+|---|---|:---:|:---:|---|:---:|---|
+| Super Saiyan | `/ssj ssj` | 🟡 gold | 2/s | Strength I, Speed I | +2 | Flight |
+| Super Saiyan 2 | `/ssj ssj2` | 🟡 gold | 3/s | Strength II, Resistance I | +4 | Lightning aura |
+| Super Saiyan 3 | `/ssj ssj3` | 🟨 yellow | 5/s | Strength II, Speed II | +6 | Lightning aura |
+| Super Saiyan 4 | `/ssj ssj4` | 🟥 crimson | 6/s | Strength III, Regeneration | +8 | Lightning aura |
+| Super Saiyan God | `/ssj god` | 🔴 red | 8/s | Strength III, Resistance II | +10 | Flight |
+| Super Saiyan Blue | `/ssj blue` | 🔵 aqua | 10/s | Strength IV, Speed III | +12 | Ki ×2.0 |
+| Ultra Instinct | `/ssj ui` | ⚪ silver | 15/s | Strength IV, Speed IV, Resistance III | +15 | **30% auto-dodge** |
 
-A glowing ki ball grows in your hands while a *KA... ME... HA... ME...* bar fills up. The beam uses ray tracing to find its target, knocks enemies back and explodes on impact (no block damage). Getting hit while charging breaks your focus.
+The "hair color" change is a colored particle aura **plus a colored glow outline and name color** that everyone can see. Transforming strikes lightning, and forms also multiply your ki attack damage and Scouter power level.
 
-### 🔴 Kaioken
-Four levels of power, each with a heavier price paid in health when it ends.
+### 💥 Ki attacks that reshape the world
+Every attack charges up through 4 levels. Hold **Shift** while charging and release to fire. Every attack destroys terrain.
 
-| Level | Strength | Speed | Duration | Health lost after |
-|:---:|:---:|:---:|:---:|:---:|
-| x2 | I | I | 60 s | 15% |
-| x3 | II | II | 45 s | 30% |
-| x10 | III | II | 30 s | 55% |
-| x20 | IV | III | 20 s | 80% |
+| Attack | Command | Style | Max level |
+|---|---|---|---|
+| 🔵 **Kamehameha** | `/kamehameha` | Blue beam | 10 ❤, 50 blocks, crater 4 |
+| 🟣 **Galick Gun** | `/galickgun` | Purple beam, charges fastest | 9 ❤, 45 blocks, crater 3.5 |
+| 🟡 **Final Flash** | `/finalflash` | Golden beam, slow but devastating | 14 ❤, 70 blocks, crater 6 |
+| 🌀 **Special Beam Cannon** | `/specialbeamcannon` | Spiral beam that **pierces** mobs, players and blocks | 11 ❤ to everything in a 70-block line |
+| ⚪ **Spirit Bomb** | `/spiritbomb` | Giant flying energy ball; **friends hold Shift to help charge it** | 16 ❤, blast radius 7, crater 8 |
 
-A red aura grows with the level. Kaioken never kills you, but it can leave you on half a heart.
+Getting hit while charging breaks your focus. Chests, obsidian and bedrock survive explosions by default.
 
-### 🏋️ Gravity Chamber
-Train under **10x, 50x, 100x or 300x** gravity. Heavier gravity means stronger Slowness, Mining Fatigue and Hunger, and a bigger XP reward (60 → 800 XP). Die or quit and the training is lost.
+### 🐉 Dragon Balls & Shenron
+- **7 glowing Dragon Balls** are hidden across the world, up to 1,500 blocks from spawn.
+- Track them with the **Dragon Radar** (`/scouter dragonballs`): an arrow and the distance to the nearest ball.
+- Right-click a ball to collect it. Balls can be **dropped, stored, traded or stolen** when a holder dies.
+- Collect all 7 and use **`/shenron`**. The sky darkens, lightning strikes, and the Eternal Dragon opens a wish menu:
 
-### ☀️ Solar Flare
-A blinding flash. Every player within 10 blocks **who is looking at you** goes blind for 5 seconds. Walls protect them, and mobs lose track of you.
+| Wish | Reward |
+|---|---|
+| 🛡️ Legendary Gear | Full netherite armor and sword with max enchantments |
+| 💎 Riches | 64 diamonds, 16 netherite ingots, 50 XP levels |
+| ❤️ Immortal Body | +10 max hearts for 7 days |
+| ⭐ Unlimited Power | No cooldowns on any ability for 1 hour |
 
-### 📡 Scouter
-Read anyone's **power level**, health, armor, XP level, active Kaioken and coordinates. Scan the whole server at once and click a name for a full reading. Scouters still beep *IT'S OVER 9000!*
+After a wish the balls **turn to stone for 24 hours**, then scatter again. Each cycle has a unique ID, so leftover or duplicated balls are worthless. Balls lost in the void fly to a new hiding place.
 
-### 🌀 Instant Transmission
-Save up to 3 **ki marks** and teleport to them instantly, jump to exact coordinates (with `~` relative support), or lock onto a friend's ki with a clickable request.
+### 🔴 Kaioken & 🏋️ Gravity Chamber
+- **Kaioken x2, x3, x10 and x20**: more Strength and Speed per level, and you lose 15–80% of your max health when it ends.
+- **Gravity training at 10x, 50x, 100x or 300x**: heavier effects mean more XP (60 → 800).
 
-### ☁️ Flying Nimbus · 🫘 Senzu Bean
-Fly in survival on Kintoun (get hit and you fall off), or eat a Senzu Bean for a full heal on a 12-hour cooldown.
+### ☀️ Solar Flare · 📡 Scouter
+- **Solar Flare**: blinds every nearby player who is looking at you. Walls protect them, and mobs lose track of you.
+- **Scouter**: read anyone's power level, health, armor, transformation, active wishes, Dragon Balls held and coordinates. Yes, it says *IT'S OVER 9000!*
+
+### 🌀 Instant Transmission · ☁️ Nimbus · 🫘 Senzu
+Ki marks you can teleport to, coordinate teleports, clickable teleport requests, survival flight on the Flying Nimbus, and a full heal from a Senzu Bean.
 
 ---
 
 ## 🎮 Commands
 
-| Command | Alias | Description | Default cooldown |
-|---|---|---|:---:|
-| `/kamehameha` | `/kame` | Charge, then release Shift (or retype) to fire | 20 s – 5 min |
-| `/kaioken [x2\|x3\|x10\|x20]` | | Power boost that costs health | 12 – 24 h |
-| `/gravity [10x\|50x\|100x\|300x]` | | Gravity training for XP · `/gravity stop` to quit | 10 min – 1 h |
-| `/solarflare` | `/taiyoken` | Blind every player looking at you | 5 min |
-| `/scouter [player]` | | Scan everyone, or get a full reading of one player | 15 s |
-| `/kimark set\|del\|list [name]` | `/marks` | Manage your ki marks | – |
-| `/shunkan [mark]` | `/it` | Instant Transmission to a ki mark | 30 s |
-| `/shunkan [x] [y] [z]` | `/it` | Instant Transmission to coordinates | 30 s |
-| `/kisense [player]` | `/tpa` | Ask to teleport to a player | 30 s |
-| `/kiaccept` · `/kideny` | `/tpaccept` · `/tpdeny` | Answer a request (or click in chat) | – |
-| `/nimbus` | | Toggle the Flying Nimbus | 10 s |
-| `/senzu` | | Full health and hunger | 12 h |
-| `/kamicore [reload]` | `/kami` | Help, or reload the config | – |
+| Command | Alias | Description |
+|---|---|---|
+| `/ssj [form\|off]` | `/supersaiyan`, `/transform` | List forms, transform, or power down |
+| `/kamehameha` | `/kame` | Charge and fire a Kamehameha |
+| `/galickgun` | `/galick` | Charge and fire a Galick Gun |
+| `/finalflash` | | Charge and fire a Final Flash |
+| `/specialbeamcannon` | `/sbc`, `/makankosappo` | Charge and fire a piercing beam |
+| `/spiritbomb` | `/genkidama` | Gather energy for a Spirit Bomb |
+| `/scouter [player\|dragonballs]` | | Scan power levels, or track Dragon Balls |
+| `/shenron` | | Summon Shenron with all 7 Dragon Balls |
+| `/kaioken [x2\|x3\|x10\|x20]` | | Power boost that costs health |
+| `/gravity [10x\|50x\|100x\|300x\|stop]` | | Gravity training for XP |
+| `/solarflare` | `/taiyoken` | Blind everyone looking at you |
+| `/kimark set\|del\|list [name]` | `/marks` | Manage your ki marks |
+| `/shunkan [mark]` · `/shunkan [x] [y] [z]` | `/it` | Instant Transmission |
+| `/kisense [player]` · `/kiaccept` · `/kideny` | `/tpa` · `/tpaccept` · `/tpdeny` | Teleport requests |
+| `/nimbus` | | Toggle the Flying Nimbus |
+| `/senzu` | | Full health and hunger |
+| `/kamicore [reload]` | `/kami` | Help, or reload the config |
+| `/dragonballs status\|scatter\|give` | | Admin: manage the Dragon Balls |
 
 All commands have tab-completion.
 
@@ -87,8 +107,8 @@ All commands have tab-completion.
 
 | Permission | Default | Description |
 |---|:---:|---|
-| `kamicore.<command>` | everyone | Use that ability (e.g. `kamicore.kamehameha`) |
-| `kamicore.admin` | op | `/kamicore reload` |
+| `kamicore.<command>` | everyone | Use that ability (e.g. `kamicore.finalflash`, `kamicore.supersaiyan`) |
+| `kamicore.admin` | op | `/kamicore reload` and `/dragonballs` |
 | `kamicore.bypass.cooldown` | op | Ignore all cooldowns |
 | `kamicore.bypass.marklimit` | op | Unlimited ki marks |
 
@@ -96,51 +116,70 @@ All commands have tab-completion.
 
 ## ⚙️ Configuration
 
-Every number is editable in `plugins/KamiCore/config.yml`, and `/kamicore reload` applies changes without a restart. Levels are plain YAML, so you can add your own:
+Every number lives in `plugins/KamiCore/config.yml` (forms, attack levels, wishes, destruction rules), and `/kamicore reload` applies changes without a restart. Everything is data-driven, so you can add a level or a whole new form without touching code:
 
 ```yaml
-kaioken:
-  levels:
-    x50:              # adds /kaioken x50
-      strength: 5
+supersaiyan:
+  forms:
+    rose:                    # adds /ssj rose
+      name: Super Saiyan Rosé
+      color: light_purple
+      aura: "#FF5FBF"
+      xp-drain: 12
+      strength: 4
       speed: 3
-      duration: 10
-      health-cost: 0.95
-      strain: 90
-      cooldown: 172800
+      extra-hearts: 12
+      flight: true
+      ki-multiplier: 2.2
 ```
 
-Cooldowns and ki marks are saved to `data.yml`, so they survive server restarts.
+```yaml
+destruction:
+  enabled: true                 # false = ki attacks never break blocks
+  protect-containers: true      # chests, barrels, shulkers are never destroyed
+  max-blast-resistance: 1000    # obsidian, bedrock, ancient debris survive
+  disabled-worlds: []
+```
+
+Cooldowns, ki marks, timed wishes and Dragon Ball state are all saved to disk and survive restarts.
 
 ---
 
 ## 🧠 How it works
 
-KamiCore is written in **Java 25** against the **Paper API** and has no dependencies besides Paper itself.
+KamiCore is written in **Java 25** against the **Paper API**, with no dependencies besides Paper itself.
 
-- **Modern command system:** every command implements Paper's Brigadier-backed `BasicCommand` interface. Commands are registered in code with aliases, permissions and tab-completion, not through `plugin.yml`.
-- **Ray tracing and vector math:** Kamehameha uses `World#rayTrace` along the player's look vector to find the first entity in the path. The beam is drawn by stepping along the direction vector, and knockback is applied as a velocity vector.
-- **Tick-based state machines:** charging, Kaioken auras and gravity training run on the Bukkit scheduler (20 ticks = 1 s). They clean up after themselves when a player dies, logs out or the server stops.
-- **Persistent cooldowns:** cooldowns are stored as "ready at" timestamps per player UUID in YAML, so long cooldowns can't be reset by a restart.
-- **Data-driven design:** ability levels are read from config sections at runtime, so new levels need no code changes. Older configs are upgraded automatically.
-- **Rich text UI:** MiniMessage is used for gradients, hover text and clickable chat buttons (teleport requests, scouter results, ki mark lists).
-- **CI/CD:** GitHub Actions builds every push. Pushing a version tag automatically publishes a release with the compiled jar.
+- **Modern command system:** every command implements Paper's Brigadier-backed `BasicCommand`, registered in code with aliases, permissions and tab-completion.
+- **Shared ki attack engine:** all 5 attacks run on one charge state machine with three delivery types: ray-traced **beams** (`World#rayTrace`), a **piercing** line that steps along the look vector, and a **projectile** simulated tick by tick. Each attack only defines its look in an enum; its numbers come from config.
+- **Vector math:** beam rendering, spiral particles (cross products for perpendicular vectors), knockback vectors, and a direction arrow computed from yaw for the Dragon Radar.
+- **Terrain destruction:** randomized spherical craters with protection rules based on blast resistance, container detection and per-world toggles.
+- **Super Saiyan:** a single repeating task handles auras and XP drain (`calculateTotalExperiencePoints`). Extra hearts come from namespaced **attribute modifiers**, and the colored glow uses **scoreboard teams**. The player's previous team is restored afterwards, and leftovers are cleaned up after a crash.
+- **Dragon Balls:** balls are **ItemDisplay + Interaction entities** tagged with the **Persistent Data Container**. Chunks load asynchronously (`getChunkAtAsync`) so scattering never freezes the server, a **cycle ID** makes duplicated balls worthless, and stale entities are purged on `EntitiesLoadEvent`. Lost items re-scatter themselves.
+- **Custom inventory GUI:** Shenron's wish menu is a custom `InventoryHolder`, with all clicks and drags handled safely.
+- **Persistence:** YAML storage keyed by player UUID for cooldowns, timed wishes (re-applied on join) and Dragon Ball state.
+- **CI/CD:** GitHub Actions builds every push. Pushing a version tag publishes a release with the compiled jar.
 
 ### Project structure
 
 ```
 src/main/java/com/kamismp/kamicore/
-├── KamiCore.java              # Plugin entry point: registers commands and listeners
-├── commands/                  # One class per command (BasicCommand)
-│   ├── KamehamehaCommand.java # Charge state machine, ray tracing, beam rendering
-│   ├── KaiokenCommand.java    # Levelled buffs + health cost
-│   ├── GravityCommand.java    # Levelled training sessions
-│   ├── SolarFlareCommand.java # Line-of-sight + facing checks
-│   ├── ScouterCommand.java    # Power level formula, player scanning
-│   └── ...                    # Instant Transmission, ki marks, Nimbus, Senzu
-├── data/DataStore.java        # YAML persistence for marks and cooldowns
-├── listeners/PlayerListener.java  # Death, logout, damage, world change
-└── util/                      # Cooldowns, effects, messages, level parsing
+├── KamiCore.java                 # Entry point: registers commands, listeners, tasks
+├── commands/                     # One class per command (BasicCommand)
+├── ki/
+│   ├── KiAttacks.java            # Charge state machine, beams, piercing, Spirit Bomb, impacts
+│   ├── KiStyle.java              # Look and behavior of each attack
+│   └── Destruction.java          # Crater generation with protection rules
+├── saiyan/
+│   ├── SuperSaiyan.java          # Transformations, XP drain, auras, teams, attribute modifiers
+│   └── SaiyanForm.java           # A form loaded from config
+├── dragonballs/
+│   ├── DragonBalls.java          # Scattering, collecting, cycles, radar data
+│   ├── Wishes.java               # Shenron summoning and the 4 wishes
+│   ├── WishMenu.java             # Wish GUI
+│   └── DragonBallListener.java   # Collecting, item safety, GUI and anti-exploit rules
+├── data/DataStore.java           # YAML persistence
+├── listeners/PlayerListener.java # Join, quit, death, damage, dodge
+└── util/                         # Cooldowns, effects, messages, levels, tab-completion
 ```
 
 ---
@@ -165,15 +204,13 @@ The jar is created in `build/libs/`.
 
 ---
 
-## 🗺️ Roadmap
+## 🗺️ Version history
 
 - [x] **1.0.0:** Instant Transmission, ki marks, teleport requests, Nimbus, Senzu, Gravity, Kaioken
 - [x] **1.1.0:** Kamehameha, Solar Flare, Scouter, Kaioken levels, Gravity levels
-- [ ] Combat tag (no teleporting out of PvP)
-- [ ] Super Saiyan transformation, unlocked through training
-- [ ] Dragon Balls: 7 hidden orbs, a Dragon Radar and wishes
+- [x] **2.0.0:** Super Saiyan forms, Final Flash, Galick Gun, Special Beam Cannon, Spirit Bomb, terrain destruction, Dragon Balls and Shenron
 
-See [CHANGELOG.md](CHANGELOG.md) for version history.
+See [CHANGELOG.md](CHANGELOG.md) for details.
 
 ---
 

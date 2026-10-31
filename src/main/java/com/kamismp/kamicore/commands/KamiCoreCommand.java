@@ -46,11 +46,16 @@ public final class KamiCoreCommand implements BasicCommand {
         line(sender, "/senzu", "full heal + food (long cooldown)");
         line(sender, "/gravity [10x|50x|100x|300x]", "gravity chamber training for XP");
         line(sender, "/kaioken [x2|x3|x10|x20]", "power boost that costs health");
-        line(sender, "/kamehameha", "charge (hold Shift), release to fire");
+        line(sender, "/ssj [form|off]", "Super Saiyan forms (drain XP, give flight)");
+        line(sender, "/kamehameha, /galickgun, /finalflash", "charge (hold Shift), release to fire");
+        line(sender, "/specialbeamcannon, /spiritbomb", "piercing beam / giant energy ball");
         line(sender, "/solarflare", "blind everyone who is looking at you");
         line(sender, "/scouter [player]", "power levels and locations");
+        line(sender, "/scouter dragonballs", "Dragon Radar: find the nearest ball");
+        line(sender, "/shenron", "summon the dragon with all 7 balls");
         if (sender.hasPermission("kamicore.admin")) {
             line(sender, "/kamicore reload", "reload config.yml");
+            line(sender, "/dragonballs status|scatter|give", "Dragon Ball admin tools");
         }
     }
 

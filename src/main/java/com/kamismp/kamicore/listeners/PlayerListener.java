@@ -11,6 +11,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
@@ -29,8 +30,17 @@ public final class PlayerListener implements Listener {
         Player player = event.getPlayer();
         plugin.nimbus().dismount(player, false);
         plugin.gravity().fail(player, null);
-        plugin.kamehameha().cancelCharge(player, null);
+        plugin.kiAttacks().cancelCharge(player, null);
+        plugin.superSaiyan().revert(player, null);
         plugin.teleportRequests().clearPlayer(player.getUniqueId());
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        plugin.superSaiyan().cleanupOnJoin(player);
+        plugin.wishes().refresh(player);
+        plugin.dragonBalls().purgeStale(player);
     }
 
     @EventHandler
@@ -38,16 +48,21 @@ public final class PlayerListener implements Listener {
         Player player = event.getPlayer();
         plugin.nimbus().dismount(player, false);
         plugin.gravity().fail(player, "<red>The gravity was too much... training failed.");
-        plugin.kamehameha().cancelCharge(player, null);
+        plugin.kiAttacks().cancelCharge(player, null);
+        plugin.superSaiyan().revert(player, null);
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onHit(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof Player player)) {
             return;
         }
-        if (plugin.kamehameha().isCharging(player) && plugin.getConfig().getBoolean("kamehameha.cancel-on-hit", true)) {
-            plugin.kamehameha().cancelCharge(player, "<red>You got hit and lost your focus! The Kamehameha fizzles out.");
+        if (plugin.superSaiyan().tryDodge(player)) {
+            event.setCancelled(true); // Ultra Instinct
+            return;
+        }
+        if (plugin.kiAttacks().isCharging(player) && plugin.getConfig().getBoolean("ki-attacks.cancel-on-hit", true)) {
+            plugin.kiAttacks().cancelCharge(player, "<red>You got hit and lost your focus! Your attack fizzles out.");
         }
         if (plugin.nimbus().isRiding(player) && plugin.getConfig().getBoolean("nimbus.dismount-on-hit", true)) {
             plugin.nimbus().dismount(player, false);

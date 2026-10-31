@@ -38,8 +38,26 @@ permissions:
   kamicore.scouter:
     description: Read power levels and locations with the Scouter
     default: true
+  kamicore.galickgun:
+    description: Charge and fire a Galick Gun
+    default: true
+  kamicore.finalflash:
+    description: Charge and fire a Final Flash
+    default: true
+  kamicore.specialbeamcannon:
+    description: Charge and fire a Special Beam Cannon
+    default: true
+  kamicore.spiritbomb:
+    description: Gather energy for a Spirit Bomb
+    default: true
+  kamicore.supersaiyan:
+    description: Transform into Super Saiyan forms
+    default: true
+  kamicore.shenron:
+    description: Summon Shenron with the Dragon Balls
+    default: true
   kamicore.admin:
-    description: Reload the plugin
+    description: Reload the plugin and use /dragonballs
     default: op
   kamicore.bypass.cooldown:
     description: Ignore all KamiCore cooldowns

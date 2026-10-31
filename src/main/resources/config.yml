@@ -99,12 +99,28 @@ kaioken:
       strain: 60
       cooldown: 86400      # 24 hours
 
-# /kamehameha - the longer you charge, the higher the level
-# charge = seconds of charging needed to reach the level
-# damage = 2 per heart, radius = blast area at the impact point (0 = no blast)
-kamehameha:
+# ==========================================
+#  KI ATTACKS
+# ==========================================
+# How they work: type the command to start charging. The longer you charge,
+# the higher the level. Release Shift (if you held it) or type the command again to fire.
+#
+# Per level:
+#   charge    = seconds of charging needed to reach the level
+#   damage    = damage to the target (2 = one heart). Super Saiyan forms multiply this.
+#   range     = how far it travels (blocks)
+#   radius    = blast area at the impact point (0 = no blast); 60% damage there
+#   knockback = how hard targets get pushed
+#   crater    = radius of terrain destroyed at impact (0 = none)
+#               (Special Beam Cannon: width of the tunnel it drills)
+#   cooldown  = seconds before you can use this attack again
+
+ki-attacks:
   cancel-on-hit: true      # getting hit while charging breaks your focus
   max-hold: 4              # seconds you can hold a full charge before it fires by itself
+
+# /kamehameha - Goku's classic blue beam
+kamehameha:
   levels:
     "1":
       charge: 0
@@ -112,6 +128,7 @@ kamehameha:
       range: 15
       radius: 0
       knockback: 0.4
+      crater: 0
       cooldown: 20
     "2":
       charge: 1.5
@@ -119,6 +136,7 @@ kamehameha:
       range: 25
       radius: 1.5
       knockback: 0.8
+      crater: 1.5
       cooldown: 60
     "3":
       charge: 3
@@ -126,6 +144,7 @@ kamehameha:
       range: 35
       radius: 2.5
       knockback: 1.2
+      crater: 2.5
       cooldown: 120
     "4":
       charge: 5
@@ -133,7 +152,161 @@ kamehameha:
       range: 50
       radius: 4
       knockback: 1.8
+      crater: 4
       cooldown: 300
+
+# /galickgun - Vegeta's purple beam: charges faster, a bit weaker
+galickgun:
+  levels:
+    "1":
+      charge: 0
+      damage: 5
+      range: 18
+      radius: 0
+      knockback: 0.5
+      crater: 0
+      cooldown: 20
+    "2":
+      charge: 1
+      damage: 9
+      range: 26
+      radius: 1.5
+      knockback: 0.9
+      crater: 1.5
+      cooldown: 50
+    "3":
+      charge: 2
+      damage: 14
+      range: 34
+      radius: 2.5
+      knockback: 1.3
+      crater: 2.5
+      cooldown: 100
+    "4":
+      charge: 3.5
+      damage: 18
+      range: 45
+      radius: 3.5
+      knockback: 1.6
+      crater: 3.5
+      cooldown: 240
+
+# /finalflash - Vegeta's golden beam: slow to charge, enormous power
+finalflash:
+  levels:
+    "1":
+      charge: 1
+      damage: 6
+      range: 25
+      radius: 1
+      knockback: 0.6
+      crater: 1
+      cooldown: 40
+    "2":
+      charge: 2.5
+      damage: 12
+      range: 35
+      radius: 2
+      knockback: 1.0
+      crater: 2.5
+      cooldown: 90
+    "3":
+      charge: 4.5
+      damage: 18
+      range: 50
+      radius: 3
+      knockback: 1.5
+      crater: 3.5
+      cooldown: 180
+    "4":
+      charge: 7
+      damage: 28
+      range: 70
+      radius: 5
+      knockback: 2.2
+      crater: 6
+      cooldown: 480
+
+# /specialbeamcannon - Piccolo's drilling beam: goes THROUGH mobs, players and blocks
+specialbeamcannon:
+  levels:
+    "1":
+      charge: 1
+      damage: 6
+      range: 20
+      radius: 0
+      knockback: 0.3
+      crater: 0.6
+      cooldown: 30
+    "2":
+      charge: 2.5
+      damage: 10
+      range: 35
+      radius: 0
+      knockback: 0.4
+      crater: 0.8
+      cooldown: 70
+    "3":
+      charge: 4.5
+      damage: 15
+      range: 50
+      radius: 0
+      knockback: 0.5
+      crater: 1.0
+      cooldown: 150
+    "4":
+      charge: 7
+      damage: 22
+      range: 70
+      radius: 0
+      knockback: 0.6
+      crater: 1.3
+      cooldown: 360
+
+# /spiritbomb - Goku's giant energy ball. Friends nearby can hold Shift to charge it faster!
+spiritbomb:
+  speed: 0.6               # how fast the ball flies (blocks per tick)
+  levels:
+    "1":
+      charge: 0
+      damage: 6
+      range: 25
+      radius: 2
+      knockback: 0.8
+      crater: 2
+      cooldown: 60
+    "2":
+      charge: 3
+      damage: 12
+      range: 35
+      radius: 3.5
+      knockback: 1.2
+      crater: 3.5
+      cooldown: 150
+    "3":
+      charge: 6
+      damage: 20
+      range: 45
+      radius: 5
+      knockback: 1.6
+      crater: 5
+      cooldown: 300
+    "4":
+      charge: 10
+      damage: 32
+      range: 60
+      radius: 7
+      knockback: 2.2
+      crater: 8
+      cooldown: 900
+
+# Terrain destruction from ki attacks (permanent!)
+destruction:
+  enabled: true
+  protect-containers: true      # never destroy chests, barrels, shulker boxes, furnaces...
+  max-blast-resistance: 1000    # stronger blocks survive: obsidian, bedrock, ancient debris, netherite...
+  drop-items: false             # true = destroyed blocks drop as items
+  disabled-worlds: []           # e.g. [world_nether]
 
 # /solarflare - blinds nearby players who can see you
 solarflare:
@@ -149,3 +322,151 @@ scouter:
   cooldown: 15
   show-coordinates: true
   notify-target: true      # tell players when someone scans them
+
+# ==========================================
+#  SUPER SAIYAN  (/ssj <form>, /ssj off)
+# ==========================================
+# Every second a form drains XP points. When you run out, you power down.
+# Buffs are effect levels (0 = none). extra-hearts are added to your max health.
+# color = glow outline + name color (Minecraft color names: gold, yellow, red, dark_red, aqua, white...)
+# aura  = particle color (hex)
+# ki-multiplier = ki attack damage multiplier, power-multiplier = Scouter power level multiplier
+supersaiyan:
+  cooldown-after: 30       # seconds before you can transform again after powering down
+  glow: true
+  forms:
+    ssj:
+      name: Super Saiyan
+      color: gold
+      aura: "#FFD700"
+      min-level: 5
+      xp-drain: 2
+      strength: 1
+      speed: 1
+      resistance: 0
+      jump: 1
+      regeneration: 0
+      extra-hearts: 2
+      flight: true
+      lightning: false
+      ki-multiplier: 1.2
+      power-multiplier: 50
+    ssj2:
+      name: Super Saiyan 2
+      color: gold
+      aura: "#FFE04D"
+      min-level: 10
+      xp-drain: 3
+      strength: 2
+      speed: 1
+      resistance: 1
+      jump: 1
+      regeneration: 0
+      extra-hearts: 4
+      flight: true
+      lightning: true
+      ki-multiplier: 1.35
+      power-multiplier: 100
+    ssj3:
+      name: Super Saiyan 3
+      color: yellow
+      aura: "#FFF27A"
+      min-level: 15
+      xp-drain: 5
+      strength: 2
+      speed: 2
+      resistance: 1
+      jump: 2
+      regeneration: 0
+      extra-hearts: 6
+      flight: true
+      lightning: true
+      ki-multiplier: 1.5
+      power-multiplier: 400
+    ssj4:
+      name: Super Saiyan 4
+      color: dark_red
+      aura: "#B3122E"
+      min-level: 20
+      xp-drain: 6
+      strength: 3
+      speed: 2
+      resistance: 2
+      jump: 2
+      regeneration: 1
+      extra-hearts: 8
+      flight: true
+      lightning: true
+      ki-multiplier: 1.7
+      power-multiplier: 1000
+    god:
+      name: Super Saiyan God
+      color: red
+      aura: "#FF3D3D"
+      min-level: 25
+      xp-drain: 8
+      strength: 3
+      speed: 2
+      resistance: 2
+      jump: 2
+      regeneration: 1
+      extra-hearts: 10
+      flight: true
+      lightning: false
+      ki-multiplier: 1.85
+      power-multiplier: 2000
+    blue:
+      name: Super Saiyan Blue
+      color: aqua
+      aura: "#34D2FF"
+      min-level: 30
+      xp-drain: 10
+      strength: 4
+      speed: 3
+      resistance: 2
+      jump: 2
+      regeneration: 1
+      extra-hearts: 12
+      flight: true
+      lightning: false
+      ki-multiplier: 2.0
+      power-multiplier: 5000
+    ui:
+      name: Ultra Instinct
+      color: white
+      aura: "#E9EEFF"
+      min-level: 40
+      xp-drain: 15
+      strength: 4
+      speed: 4
+      resistance: 3
+      jump: 3
+      regeneration: 2
+      extra-hearts: 15
+      flight: true
+      lightning: false
+      ki-multiplier: 2.5
+      power-multiplier: 10000
+      dodge-chance: 0.3    # 30% chance to dodge any attack automatically
+
+# ==========================================
+#  DRAGON BALLS  (/scouter dragonballs, /shenron)
+# ==========================================
+dragonballs:
+  world: world             # the balls are hidden in this world
+  radius: 1500             # max distance from world spawn
+  min-distance: 150        # min distance from world spawn
+  return-after: 86400      # after a wish, the balls are stone for this long (24 hours)
+  radar-seconds: 20        # how long /scouter dragonballs keeps pointing
+  radar-shows-coordinates: false
+
+wishes:
+  riches:
+    diamonds: 64
+    netherite-ingots: 16
+    xp-levels: 50
+  immortal-body:
+    extra-hearts: 10
+    days: 7
+  unlimited-power:
+    minutes: 60

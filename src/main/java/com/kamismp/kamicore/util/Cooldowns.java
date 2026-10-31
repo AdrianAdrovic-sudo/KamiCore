@@ -19,7 +19,7 @@ public final class Cooldowns {
 
     /** Milliseconds left on a cooldown (0 = ready). */
     public long remaining(Player player, String ability) {
-        if (player.hasPermission(BYPASS_PERMISSION)) {
+        if (player.hasPermission(BYPASS_PERMISSION) || plugin.wishes().hasUnlimitedPower(player)) {
             return 0;
         }
         long readyAt = plugin.data().getCooldown(player.getUniqueId(), ability);
@@ -40,7 +40,7 @@ public final class Cooldowns {
 
     /** Starts a cooldown that lasts the given number of seconds. */
     public void start(Player player, String ability, long seconds) {
-        if (seconds <= 0 || player.hasPermission(BYPASS_PERMISSION)) {
+        if (seconds <= 0 || player.hasPermission(BYPASS_PERMISSION) || plugin.wishes().hasUnlimitedPower(player)) {
             return;
         }
         long readyAt = System.currentTimeMillis() + seconds * 1000L;

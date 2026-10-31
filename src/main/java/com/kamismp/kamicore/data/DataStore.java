@@ -99,6 +99,18 @@ public final class DataStore {
         save();
     }
 
+    // ---------------------------------------------- timed wishes and others
+
+    /** A number saved for a player, e.g. "immortal-until" (0 if not set). */
+    public long getPlayerLong(UUID player, String key) {
+        return yaml.getLong(base(player) + "." + key, 0L);
+    }
+
+    public void setPlayerLong(UUID player, String key, long value) {
+        yaml.set(base(player) + "." + key, value == 0 ? null : value);
+        save();
+    }
+
     // ----------------------------------------------------------- cooldowns
 
     public long getCooldown(UUID player, String ability) {

@@ -48,6 +48,10 @@ public final class NimbusCommand implements BasicCommand {
             Msg.send(player, "<gray>You can already fly in this game mode.");
             return;
         }
+        if (plugin.superSaiyan().isTransformed(player)) {
+            Msg.send(player, "<gray>You don't need Nimbus, your ki lets you fly on your own!");
+            return;
+        }
         if (plugin.gravity().isTraining(player)) {
             Msg.send(player, "<red>Nimbus can't reach you inside the gravity chamber!");
             return;

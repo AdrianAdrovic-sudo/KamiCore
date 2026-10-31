@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.0.0] - 2026-10-31
+
+### Added
+- **Super Saiyan** (`/ssj`): 7 forms (SSJ, SSJ2, SSJ3, SSJ4, God, Blue, Ultra Instinct). Each drains XP every second and gives scaling buffs, extra hearts, flight, a colored aura and a colored glow outline. Ultra Instinct can dodge attacks automatically.
+- **New ki attacks:** Galick Gun, Final Flash, Special Beam Cannon (pierces through everything) and Spirit Bomb (flying energy ball; nearby friends can help charge it).
+- **Terrain destruction** for all ki attacks, with protection for containers and strong blocks, and per-world toggles.
+- **Dragon Balls:** 7 balls scattered across the world, the Dragon Radar (`/scouter dragonballs`), Shenron (`/shenron`) with 4 wishes, and a 24-hour stone period before they scatter again.
+- Wishes: Legendary Gear, Riches, Immortal Body (+10 hearts for 7 days) and Unlimited Power (no cooldowns for 1 hour).
+- `/dragonballs status|scatter|give` admin command.
+- The Scouter shows transformations, active wishes and Dragon Balls held, and power levels are multiplied by Super Saiyan forms.
+
+### Changed
+- Kamehameha now runs on the shared ki attack engine and creates craters.
+- `kamehameha.cancel-on-hit` and `max-hold` moved to `ki-attacks`.
+
 ## [1.1.0] - 2026-10-30
 
 ### Added

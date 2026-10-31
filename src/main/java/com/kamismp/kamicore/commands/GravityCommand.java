@@ -100,8 +100,9 @@ public final class GravityCommand implements BasicCommand {
         int hunger = level.getInt("hunger", 0);
         String label = levelName.toUpperCase(Locale.ROOT);
 
-        // No flying in the chamber
+        // No flying or transforming in the chamber
         plugin.nimbus().dismount(player, true);
+        plugin.superSaiyan().revert(player, "<gray>The gravity forces you back to your base form.");
 
         int ticks = (duration + 1) * 20;
         if (slowness > 0) {
