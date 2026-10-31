@@ -70,7 +70,7 @@ public final class SuperSaiyanCommand implements BasicCommand {
             String status = unlocked ? "" : " <red>(needs " + form.minLevel() + " levels)";
             Msg.raw(player, " <dark_gray>-</dark_gray> <click:run_command:'/ssj " + form.id() + "'><hover:show_text:'Click to transform'>"
                     + form.chatColor() + form.name() + "</hover></click> <gray>/ssj " + form.id() + " · drains <yellow>"
-                    + form.xpDrain() + " XP/s</yellow> · +" + formatHearts(form.extraHearts()) + " ❤" + (form.flight() ? " · flight" : "")
+                    + form.xpDrain() + " XP/s</yellow> · +" + formatHearts(form.extraHearts()) + " ❤" + " · flight " + form.flightSpeed() + "x"
                     + (form.dodgeChance() > 0 ? " · " + Math.round(form.dodgeChance() * 100) + "% dodge" : "") + status);
         }
     }

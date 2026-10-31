@@ -36,7 +36,7 @@ public final class KaiokenCommand implements BasicCommand {
     private static final String LEVELS_PATH = "kaioken.levels";
 
     /** Who is using Kaioken right now, and at what level. */
-    private record Active(String level, int multiplier, BukkitTask task) {
+    private record Active(String level, int multiplier, double kiMultiplier, BukkitTask task) {
     }
 
     private final KamiCore plugin;
@@ -80,6 +80,7 @@ public final class KaiokenCommand implements BasicCommand {
         int speed = Math.max(1, level.getInt("speed", 1));
         double healthCost = clamp(level.getDouble("health-cost", 0.2), 0, 1);
         int strain = level.getInt("strain", 20);
+        double kiMultiplier = Math.max(1.0, level.getDouble("ki-multiplier", 1.0));
         int ticks = duration * 20;
 
         // Amplifier 0 = level I, so subtract 1
@@ -118,7 +119,7 @@ public final class KaiokenCommand implements BasicCommand {
             }
         }.runTaskTimer(plugin, 0L, 10L);
 
-        active.put(player.getUniqueId(), new Active(levelName, multiplier, task));
+        active.put(player.getUniqueId(), new Active(levelName, multiplier, kiMultiplier, task));
     }
 
     /** The price of Kaioken: lose a part of your max health, plus Weakness and Slowness. */
@@ -146,6 +147,12 @@ public final class KaiokenCommand implements BasicCommand {
     public int multiplier(Player player) {
         Active a = active.get(player.getUniqueId());
         return a == null ? 1 : a.multiplier();
+    }
+
+    /** How much stronger ki attacks are while this Kaioken is active (1.0 = normal). */
+    public double kiMultiplier(Player player) {
+        Active a = active.get(player.getUniqueId());
+        return a == null ? 1.0 : a.kiMultiplier();
     }
 
     public void cancelAll() {

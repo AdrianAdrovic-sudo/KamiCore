@@ -27,15 +27,18 @@ Every form drains your **XP as ki** each second. Higher forms give bigger buffs,
 
 | Form | Command | Glow | XP drain | Buffs | Extra hearts | Special |
 |---|---|:---:|:---:|---|:---:|---|
-| Super Saiyan | `/ssj ssj` | 🟡 gold | 2/s | Strength I, Speed I | +2 | Flight |
+| Super Saiyan | `/ssj ssj` | 🟡 gold | 2/s | Strength I, Speed I | +2 | Ki ×1.2 |
 | Super Saiyan 2 | `/ssj ssj2` | 🟡 gold | 3/s | Strength II, Resistance I | +4 | Lightning aura |
 | Super Saiyan 3 | `/ssj ssj3` | 🟨 yellow | 5/s | Strength II, Speed II | +6 | Lightning aura |
 | Super Saiyan 4 | `/ssj ssj4` | 🟥 crimson | 6/s | Strength III, Regeneration | +8 | Lightning aura |
-| Super Saiyan God | `/ssj god` | 🔴 red | 8/s | Strength III, Resistance II | +10 | Flight |
+| Super Saiyan God | `/ssj god` | 🔴 red | 8/s | Strength III, Resistance II | +10 | Ki ×1.85 |
 | Super Saiyan Blue | `/ssj blue` | 🔵 aqua | 10/s | Strength IV, Speed III | +12 | Ki ×2.0 |
 | Ultra Instinct | `/ssj ui` | ⚪ silver | 15/s | Strength IV, Speed IV, Resistance III | +15 | **30% auto-dodge** |
 
-The "hair color" change is a colored particle aura **plus a colored glow outline and name color** that everyone can see. Transforming strikes lightning, and forms also multiply your ki attack damage and Scouter power level.
+The "hair color" change is a colored particle aura **plus a colored glow outline and name color** that everyone can see. Transforming strikes lightning.
+
+- **Ki flight:** double-tap jump in the air to fly like an elytra, steering where you look. Higher forms fly faster (up to 2× for Ultra Instinct). Sneak to land; no fall or crash damage while transformed.
+- **Powered-up ki attacks:** forms (and Kaioken) make every ki attack stronger, **bigger and longer-ranged**, with beams wrapped in your aura color.
 
 ### 💥 Ki attacks that reshape the world
 Every attack charges up through 4 levels. Hold **Shift** while charging and release to fire. Every attack destroys terrain.
@@ -66,7 +69,7 @@ Getting hit while charging breaks your focus. Chests, obsidian and bedrock survi
 After a wish the balls **turn to stone for 24 hours**, then scatter again. Each cycle has a unique ID, so leftover or duplicated balls are worthless. Balls lost in the void fly to a new hiding place.
 
 ### 🔴 Kaioken & 🏋️ Gravity Chamber
-- **Kaioken x2, x3, x10 and x20**: more Strength and Speed per level, and you lose 15–80% of your max health when it ends.
+- **Kaioken x2, x3, x10 and x20**: more Strength and Speed per level, and ki attacks up to 1.8× stronger with a red aura. You lose 15–80% of your max health when it ends.
 - **Gravity training at 10x, 50x, 100x or 300x**: heavier effects mean more XP (60 → 800).
 
 ### ☀️ Solar Flare · 📡 Scouter
@@ -153,6 +156,7 @@ KamiCore is written in **Java 25** against the **Paper API**, with no dependenci
 - **Shared ki attack engine:** all 5 attacks run on one charge state machine with three delivery types: ray-traced **beams** (`World#rayTrace`), a **piercing** line that steps along the look vector, and a **projectile** simulated tick by tick. Each attack only defines its look in an enum; its numbers come from config.
 - **Vector math:** beam rendering, spiral particles (cross products for perpendicular vectors), knockback vectors, and a direction arrow computed from yaw for the Dragon Radar.
 - **Terrain destruction:** randomized spherical craters with protection rules based on blast resistance, container detection and per-world toggles.
+- **Ki flight:** elytra-style gliding without an elytra, kept alive by cancelling `EntityToggleGlideEvent` and steered with a per-tick velocity that eases toward the look direction.
 - **Super Saiyan:** a single repeating task handles auras and XP drain (`calculateTotalExperiencePoints`). Extra hearts come from namespaced **attribute modifiers**, and the colored glow uses **scoreboard teams**. The player's previous team is restored afterwards, and leftovers are cleaned up after a crash.
 - **Dragon Balls:** balls are **ItemDisplay + Interaction entities** tagged with the **Persistent Data Container**. Chunks load asynchronously (`getChunkAtAsync`) so scattering never freezes the server, a **cycle ID** makes duplicated balls worthless, and stale entities are purged on `EntitiesLoadEvent`. Lost items re-scatter themselves.
 - **Custom inventory GUI:** Shenron's wish menu is a custom `InventoryHolder`, with all clicks and drags handled safely.
@@ -209,6 +213,7 @@ The jar is created in `build/libs/`.
 - [x] **1.0.0:** Instant Transmission, ki marks, teleport requests, Nimbus, Senzu, Gravity, Kaioken
 - [x] **1.1.0:** Kamehameha, Solar Flare, Scouter, Kaioken levels, Gravity levels
 - [x] **2.0.0:** Super Saiyan forms, Final Flash, Galick Gun, Special Beam Cannon, Spirit Bomb, terrain destruction, Dragon Balls and Shenron
+- [x] **2.1.0:** Elytra-style ki flight; forms and Kaioken power up ki attacks
 
 See [CHANGELOG.md](CHANGELOG.md) for details.
 

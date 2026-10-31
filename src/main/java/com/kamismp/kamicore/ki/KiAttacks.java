@@ -1,6 +1,7 @@
 package com.kamismp.kamicore.ki;
 
 import com.kamismp.kamicore.KamiCore;
+import com.kamismp.kamicore.saiyan.SaiyanForm;
 import com.kamismp.kamicore.util.Msg;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -45,6 +46,22 @@ public final class KiAttacks {
     public record Level(int number, double chargeSeconds, double damage, double range, double radius,
                         double knockback, double crater, long cooldown) {
     }
+
+    /**
+     * How much a player's state boosts their ki attacks right now.
+     * Super Saiyan forms and Kaioken multiply together.
+     *  damage = damage multiplier, size = beams/balls/craters/blasts, range = how far it travels,
+     *  aura   = extra outer color layer from the Super Saiyan form (null in base form)
+     */
+    public record Power(double damage, double size, double range, Color aura, boolean kaioken) {
+        static final Power NORMAL = new Power(1, 1, 1, null, false);
+
+        float particle(float base) {
+            return (float) Math.min(4.0, base * size);
+        }
+    }
+
+    private static final Color KAIOKEN_RED = Color.fromRGB(255, 40, 30);
 
     /** A player who is charging right now. */
     private static final class Charge {
@@ -151,7 +168,7 @@ public final class KiAttacks {
                     return;
                 }
 
-                drawCharge(player, style, charge.levelIndex, levels.size());
+                drawCharge(player, style, charge.levelIndex, levels.size(), power(player));
                 String extra = helpers > 0 ? " <green>+" + helpers + " helping" : "";
                 Msg.actionBar(player, chargeBar(style, charge.levelIndex, levels.size()) + extra);
             }
@@ -194,6 +211,20 @@ public final class KiAttacks {
         flyingBombs.clear();
     }
 
+    /** Works out the current boost from Super Saiyan + Kaioken. */
+    public Power power(Player player) {
+        double ssj = plugin.superSaiyan().kiMultiplier(player);
+        double kaioken = plugin.kaioken().kiMultiplier(player);
+        double max = Math.max(1, plugin.getConfig().getDouble("ki-attacks.max-multiplier", 4.0));
+        double total = Math.min(max, ssj * kaioken);
+        if (total <= 1.0001) {
+            return Power.NORMAL;
+        }
+        SaiyanForm form = plugin.superSaiyan().current(player);
+        return new Power(total, 1 + (total - 1) * 0.6, 1 + (total - 1) * 0.3,
+                form != null ? form.auraColor() : null, kaioken > 1);
+    }
+
     // ================================================================== firing
 
     private void fire(Player player) {
@@ -204,40 +235,47 @@ public final class KiAttacks {
         charge.task.cancel();
         player.removePotionEffect(PotionEffectType.SLOWNESS);
 
-        Level level = charge.levels.get(Math.min(charge.levelIndex, charge.levels.size() - 1));
-        boolean isMax = level.number() == charge.levels.size();
+        Level base = charge.levels.get(Math.min(charge.levelIndex, charge.levels.size() - 1));
+        boolean isMax = base.number() == charge.levels.size();
         KiStyle style = charge.style;
 
-        plugin.cooldowns().start(player, style.id(), level.cooldown());
+        // Super Saiyan / Kaioken make the attack stronger, bigger and longer
+        Power power = power(player);
+        Level level = new Level(base.number(), base.chargeSeconds(), base.damage() * power.damage(), base.range() * power.range(),
+                base.radius() * power.size(), base.knockback() * (1 + (power.size() - 1) * 0.5), base.crater() * power.size(),
+                base.cooldown());
+
+        plugin.cooldowns().start(player, style.id(), base.cooldown());
         String shout = isMax ? "<b>" + style.shout() + "</b>" : style.shout();
-        Msg.send(player, "<aqua>" + shout + "</aqua> <gray>(" + style.displayName() + " level <yellow>" + level.number() + "</yellow>)");
+        String boost = power.damage() > 1 ? " <gold>x" + String.format(java.util.Locale.ROOT, "%.1f", power.damage()) + " power</gold>" : "";
+        Msg.send(player, "<aqua>" + shout + "</aqua> <gray>(" + style.displayName() + " level <yellow>" + level.number() + "</yellow>)" + boost);
 
         switch (style.type()) {
-            case BEAM -> fireBeam(player, style, level);
-            case PIERCE -> firePiercing(player, style, level);
-            case BOMB -> fireBomb(player, style, level);
+            case BEAM -> fireBeam(player, style, level, power);
+            case PIERCE -> firePiercing(player, style, level, power);
+            case BOMB -> fireBomb(player, style, level, power);
         }
     }
 
     /** Kamehameha, Galick Gun, Final Flash: a beam that stops at the first thing it hits. */
-    private void fireBeam(Player player, KiStyle style, Level level) {
+    private void fireBeam(Player player, KiStyle style, Level level, Power power) {
         World world = player.getWorld();
         Location eye = player.getEyeLocation();
         Vector direction = eye.getDirection().normalize();
         Location start = eye.clone().add(direction.clone().multiply(0.8)).add(0, -0.3, 0);
 
-        double width = 0.3 + level.number() * 0.15;
+        double width = (0.3 + level.number() * 0.15) * power.size();
         RayTraceResult hit = world.rayTrace(start, direction, level.range(), FluidCollisionMode.NEVER, true, width,
                 entity -> isTarget(entity, player));
         Location end = hit != null
                 ? hit.getHitPosition().toLocation(world)
                 : start.clone().add(direction.clone().multiply(level.range()));
 
-        drawBeam(start, end, style, level.number());
+        drawBeam(start, end, style, level.number(), power);
         world.playSound(player.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 1.0f, 1.3f - level.number() * 0.1f);
 
         Entity direct = hit != null ? hit.getHitEntity() : null;
-        double damage = level.damage() * plugin.superSaiyan().kiMultiplier(player);
+        double damage = level.damage();
         if (direct instanceof LivingEntity target) {
             hurt(target, player, damage, direction.clone().multiply(level.knockback()));
         }
@@ -247,18 +285,20 @@ public final class KiAttacks {
     }
 
     /** Special Beam Cannon: drills through everything in a straight line. */
-    private void firePiercing(Player player, KiStyle style, Level level) {
+    private void firePiercing(Player player, KiStyle style, Level level, Power power) {
         World world = player.getWorld();
         Location eye = player.getEyeLocation();
         Vector direction = eye.getDirection().normalize();
         Location point = eye.clone().add(direction.clone().multiply(0.6));
         Vector step = direction.clone().multiply(0.5);
-        double damage = level.damage() * plugin.superSaiyan().kiMultiplier(player);
+        double damage = level.damage();
+        double hitRadius = 1.0 * power.size();
         double tunnel = Math.max(0, level.crater());
 
         Set<UUID> alreadyHit = new HashSet<>();
-        Particle.DustOptions core = new Particle.DustOptions(style.coreColor(), 1.0f);
-        Particle.DustOptions spiral = new Particle.DustOptions(style.mainColor(), 0.9f);
+        Particle.DustOptions core = new Particle.DustOptions(style.coreColor(), power.particle(1.0f));
+        Particle.DustOptions spiral = new Particle.DustOptions(style.mainColor(), power.particle(0.9f));
+        Particle.DustOptions aura = auraDust(power, 1.0f);
 
         int hits = 0;
         int steps = (int) (level.range() / 0.5);
@@ -279,7 +319,7 @@ public final class KiAttacks {
                 }
             }
 
-            for (LivingEntity target : world.getNearbyLivingEntities(point, 1.0)) {
+            for (LivingEntity target : world.getNearbyLivingEntities(point, hitRadius)) {
                 if (isTarget(target, player) && alreadyHit.add(target.getUniqueId())) {
                     hurt(target, player, damage, direction.clone().multiply(level.knockback()));
                     hits++;
@@ -289,8 +329,12 @@ public final class KiAttacks {
             // Straight core + a spiral wrapped around it
             world.spawnParticle(Particle.DUST, point, 1, 0, 0, 0, 0, core);
             double angle = i * 0.9;
-            Vector offset = perpendicular(direction, angle).multiply(0.35);
+            Vector offset = perpendicular(direction, angle).multiply(0.35 * power.size());
             world.spawnParticle(Particle.DUST, point.clone().add(offset), 1, 0, 0, 0, 0, spiral);
+            if (aura != null && i % 2 == 0) {
+                Vector auraOffset = perpendicular(direction, angle + Math.PI).multiply(0.5 * power.size());
+                world.spawnParticle(Particle.DUST, point.clone().add(auraOffset), 1, 0, 0, 0, 0, aura);
+            }
         }
 
         world.playSound(player.getLocation(), Sound.ENTITY_GHAST_SHOOT, 1.0f, 2.0f);
@@ -301,13 +345,13 @@ public final class KiAttacks {
     }
 
     /** Spirit Bomb: a huge ball that flies slowly and explodes on impact. */
-    private void fireBomb(Player player, KiStyle style, Level level) {
+    private void fireBomb(Player player, KiStyle style, Level level, Power power) {
         World world = player.getWorld();
-        double ballRadius = bombRadius(level.number() - 1);
+        double ballRadius = Math.min(6, bombRadius(level.number() - 1) * power.size());
         Location ball = player.getLocation().add(0, 3 + ballRadius, 0);
         Vector velocity = player.getEyeLocation().getDirection().normalize()
                 .multiply(plugin.getConfig().getDouble("spiritbomb.speed", 0.6));
-        double damage = level.damage() * plugin.superSaiyan().kiMultiplier(player);
+        double damage = level.damage();
         world.playSound(ball, Sound.ENTITY_WITHER_SPAWN, 0.7f, 1.6f);
 
         BukkitTask[] self = new BukkitTask[1];
@@ -318,7 +362,7 @@ public final class KiAttacks {
             public void run() {
                 ball.add(velocity);
                 travelled += velocity.length();
-                drawSphere(world, ball, ballRadius, 30 + (int) (ballRadius * 15), style.mainColor(), style.coreColor());
+                drawSphere(world, ball, ballRadius, 30 + (int) (ballRadius * 15), style.mainColor(), style.coreColor(), power);
 
                 boolean hitBlock = !ball.getBlock().isPassable();
                 boolean hitEntity = false;
@@ -379,7 +423,7 @@ public final class KiAttacks {
 
     // ================================================================= visuals
 
-    private void drawCharge(Player player, KiStyle style, int levelIndex, int levelCount) {
+    private void drawCharge(Player player, KiStyle style, int levelIndex, int levelCount, Power power) {
         World world = player.getWorld();
         Location eye = player.getEyeLocation();
         Vector look = eye.getDirection();
@@ -387,9 +431,13 @@ public final class KiAttacks {
         switch (style.type()) {
             case BEAM -> {
                 Location hands = eye.clone().add(look.multiply(0.7)).add(0, -0.5, 0);
-                double spread = 0.08 + levelIndex * 0.06;
+                double spread = (0.08 + levelIndex * 0.06) * power.size();
                 world.spawnParticle(Particle.DUST, hands, 4 + levelIndex * 4, spread, spread, spread, 0.0,
-                        new Particle.DustOptions(style.mainColor(), 0.8f + levelIndex * 0.5f));
+                        new Particle.DustOptions(style.mainColor(), power.particle(0.8f + levelIndex * 0.5f)));
+                Particle.DustOptions aura = auraDust(power, 1.0f + levelIndex * 0.3f);
+                if (aura != null) {
+                    world.spawnParticle(Particle.DUST, hands, 3 + levelIndex * 2, spread * 1.6, spread * 1.6, spread * 1.6, 0.0, aura);
+                }
                 if (levelIndex == levelCount - 1) {
                     world.spawnParticle(Particle.ELECTRIC_SPARK, hands, 3, 0.2, 0.2, 0.2, 0.05);
                 }
@@ -397,13 +445,13 @@ public final class KiAttacks {
             case PIERCE -> {
                 Location forehead = eye.clone().add(look.multiply(0.35)).add(0, 0.15, 0);
                 world.spawnParticle(Particle.DUST, forehead, 2 + levelIndex * 2, 0.03, 0.03, 0.03, 0.0,
-                        new Particle.DustOptions(style.coreColor(), 0.6f + levelIndex * 0.2f));
+                        new Particle.DustOptions(style.coreColor(), power.particle(0.6f + levelIndex * 0.2f)));
                 world.spawnParticle(Particle.ELECTRIC_SPARK, forehead, 1 + levelIndex, 0.1, 0.1, 0.1, 0.02);
             }
             case BOMB -> {
-                double radius = bombRadius(levelIndex);
+                double radius = Math.min(6, bombRadius(levelIndex) * power.size());
                 Location above = player.getLocation().add(0, 3 + radius, 0);
-                drawSphere(world, above, radius, 20 + (int) (radius * 12), style.mainColor(), style.coreColor());
+                drawSphere(world, above, radius, 20 + (int) (radius * 12), style.mainColor(), style.coreColor(), power);
                 // Energy flowing up into the ball
                 world.spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1, 0), 3, 3, 1, 3, 0.05);
             }
@@ -414,7 +462,7 @@ public final class KiAttacks {
         return 0.6 + levelIndex * 0.6;
     }
 
-    private void drawBeam(Location start, Location end, KiStyle style, int levelNumber) {
+    private void drawBeam(Location start, Location end, KiStyle style, int levelNumber, Power power) {
         World world = start.getWorld();
         Vector step = end.toVector().subtract(start.toVector());
         double length = step.length();
@@ -422,21 +470,32 @@ public final class KiAttacks {
             return;
         }
         step.normalize().multiply(0.4);
-        double spread = 0.05 + levelNumber * 0.07;
-        Particle.DustOptions outer = new Particle.DustOptions(style.mainColor(), 1.0f + levelNumber * 0.5f);
-        Particle.DustOptions inner = new Particle.DustOptions(style.coreColor(), 0.8f + levelNumber * 0.2f);
+        double spread = (0.05 + levelNumber * 0.07) * power.size();
+        Particle.DustOptions outer = new Particle.DustOptions(style.mainColor(), power.particle(1.0f + levelNumber * 0.5f));
+        Particle.DustOptions inner = new Particle.DustOptions(style.coreColor(), power.particle(0.8f + levelNumber * 0.2f));
+        Particle.DustOptions aura = auraDust(power, 1.2f + levelNumber * 0.3f);
+        Particle.DustOptions kaioken = power.kaioken() ? new Particle.DustOptions(KAIOKEN_RED, power.particle(1.0f)) : null;
 
         Location point = start.clone();
-        for (double travelled = 0; travelled < length; travelled += 0.4) {
-            world.spawnParticle(Particle.DUST, point, 3, spread, spread, spread, 0.0, outer);
+        int i = 0;
+        for (double travelled = 0; travelled < length; travelled += 0.4, i++) {
+            world.spawnParticle(Particle.DUST, point, 3 + (int) power.size(), spread, spread, spread, 0.0, outer);
             world.spawnParticle(Particle.DUST, point, 1, 0.01, 0.01, 0.01, 0.0, inner);
+            // Super Saiyan aura and Kaioken red wrap around the outside of the beam
+            if (aura != null && i % 2 == 0) {
+                world.spawnParticle(Particle.DUST, point, 2, spread * 1.8, spread * 1.8, spread * 1.8, 0.0, aura);
+            }
+            if (kaioken != null && i % 3 == 0) {
+                world.spawnParticle(Particle.DUST, point, 1, spread * 2.2, spread * 2.2, spread * 2.2, 0.0, kaioken);
+            }
             point.add(step);
         }
     }
 
-    private static void drawSphere(World world, Location center, double radius, int count, Color main, Color core) {
+    private static void drawSphere(World world, Location center, double radius, int count, Color main, Color core, Power power) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         Particle.DustOptions shell = new Particle.DustOptions(main, 1.6f);
+        Particle.DustOptions aura = auraDust(power, 1.4f);
         Particle.DustOptions inside = new Particle.DustOptions(core, 1.2f);
         for (int i = 0; i < count; i++) {
             Vector v = new Vector(random.nextGaussian(), random.nextGaussian(), random.nextGaussian());
@@ -445,8 +504,16 @@ public final class KiAttacks {
             }
             v.normalize().multiply(radius);
             world.spawnParticle(Particle.DUST, center.clone().add(v), 1, 0, 0, 0, 0, shell);
+            if (aura != null && i % 3 == 0) {
+                world.spawnParticle(Particle.DUST, center.clone().add(v.multiply(1.15)), 1, 0, 0, 0, 0, aura);
+            }
         }
         world.spawnParticle(Particle.DUST, center, Math.max(3, count / 4), radius * 0.4, radius * 0.4, radius * 0.4, 0, inside);
+    }
+
+    /** Particle settings for the Super Saiyan aura layer, or null in base form. */
+    private static Particle.DustOptions auraDust(Power power, float size) {
+        return power.aura() == null ? null : new Particle.DustOptions(power.aura(), power.particle(size));
     }
 
     /** A unit vector at a right angle to the direction, rotated by the angle (for the spiral). */

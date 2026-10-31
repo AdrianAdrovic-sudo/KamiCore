@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.1.0] - 2026-10-31
+
+### Added
+- **Ki flight:** while transformed, double-tap jump in the air to fly like an elytra powered by ki. You steer by looking, higher forms fly faster (1.0x to 2.0x), sneak to land, and double-tap again to hover. No fall or wall-crash damage while transformed.
+- **Powered-up ki attacks:** Super Saiyan forms and Kaioken levels now make ki attacks stronger, bigger and longer-ranged (beam width, ball size, blast radius, craters). Beams get an outer layer in your form's aura color, plus red for Kaioken. The boosts stack, capped by `ki-attacks.max-multiplier`.
+- `flight-speed` per form, `ki-multiplier` per Kaioken level.
+
+### Changed
+- Every Super Saiyan form can fly (the `flight` option was removed).
+
 ## [2.0.0] - 2026-10-31
 
 ### Added

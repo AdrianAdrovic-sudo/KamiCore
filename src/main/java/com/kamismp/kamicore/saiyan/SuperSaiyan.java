@@ -4,8 +4,10 @@ import com.kamismp.kamicore.KamiCore;
 import com.kamismp.kamicore.util.Msg;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import org.bukkit.Bukkit;
@@ -25,12 +27,15 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.util.Vector;
 
 /**
  * Super Saiyan transformations.
  *  - every second the form drains XP points; no XP left = you power down
  *  - buffs (Strength, Speed, Resistance...), extra hearts and flight while transformed
  *  - the "color change": a colored aura plus a colored glow outline and name color
+ *  - ki flight: double-tap jump in the air to fly like an elytra, but powered by ki.
+ *    Sneak to land. No fall or wall-crash damage while transformed.
  */
 public final class SuperSaiyan {
 
@@ -47,7 +52,9 @@ public final class SuperSaiyan {
     private final KamiCore plugin;
     private final NamespacedKey healthKey;
     private final Map<UUID, State> transformed = new HashMap<>();
+    private final Map<UUID, Integer> flying = new HashMap<>(); // player -> ticks in the air
     private BukkitTask task;
+    private BukkitTask flightTask;
     private int tickCounter;
 
     public SuperSaiyan(KamiCore plugin) {
@@ -139,12 +146,8 @@ public final class SuperSaiyan {
 
         applyHealthBonus(player, form);
         applyEffects(player, form);
-        if (form.flight()) {
-            player.setAllowFlight(true);
-        } else if (!canFlyAnyway(player)) {
-            player.setFlying(false);
-            player.setAllowFlight(false);
-        }
+        // Every form can fly: allowing flight lets us catch the double-tap of the jump key
+        player.setAllowFlight(true);
         if (plugin.getConfig().getBoolean("supersaiyan.glow", true)) {
             teamFor(form).addEntry(player.getName());
             player.setGlowing(true);
@@ -165,7 +168,7 @@ public final class SuperSaiyan {
             }
         }
         Msg.send(player, form.chatColor() + "<b>" + form.name().toUpperCase(java.util.Locale.ROOT) + "!</b><reset> <gray>Draining <yellow>"
-                + form.xpDrain() + " XP/s</yellow>. <yellow>/ssj off</yellow> to power down.");
+                + form.xpDrain() + " XP/s</yellow>. <yellow>Double-tap jump</yellow> to fly, <yellow>/ssj off</yellow> to power down.");
     }
 
     /** Powers down. reason = message to show, or null for none. */
@@ -174,6 +177,7 @@ public final class SuperSaiyan {
         if (state == null) {
             return;
         }
+        stopFlight(player);
         removeHealthBonus(player);
         removeEffects(player);
         if (!canFlyAnyway(player)) {
@@ -251,11 +255,79 @@ public final class SuperSaiyan {
                 }
             }
         }, 4L, 4L);
+
+        // Ki flight needs a new push every tick to feel smooth
+        flightTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tickFlight, 1L, 1L);
     }
 
     public void stop() {
         if (task != null) {
             task.cancel();
+        }
+        if (flightTask != null) {
+            flightTask.cancel();
+        }
+    }
+
+    // ============================================================= ki flight
+
+    public boolean isKiFlying(Player player) {
+        return flying.containsKey(player.getUniqueId());
+    }
+
+    /** Double-tapped jump while transformed: blast off like an elytra. */
+    public void startFlight(Player player) {
+        SaiyanForm form = current(player);
+        if (form == null) {
+            return;
+        }
+        flying.put(player.getUniqueId(), 0);
+        player.setFlying(false);
+        player.setGliding(true);
+        Vector launch = player.getLocation().getDirection().multiply(form.flightSpeed()).add(new Vector(0, 0.6, 0));
+        player.setVelocity(launch);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1.0f, 0.7f);
+        player.getWorld().spawnParticle(Particle.DUST, player.getLocation(), 40, 0.4, 0.2, 0.4, 0,
+                new Particle.DustOptions(form.auraColor(), 2.0f));
+        Msg.actionBar(player, form.chatColor() + "<b>Ki flight!</b><reset> <gray>Look where you want to go. <yellow>Sneak</yellow> to land.");
+    }
+
+    /** Ends ki flight (does nothing if the player isn't flying). */
+    public void stopFlight(Player player) {
+        if (flying.remove(player.getUniqueId()) == null) {
+            return;
+        }
+        // Removed from the map first, so the glide listener lets the glide end
+        player.setGliding(false);
+    }
+
+    /** Every tick: push each flyer in the direction they're looking. */
+    private void tickFlight() {
+        for (UUID id : List.copyOf(flying.keySet())) {
+            Player player = Bukkit.getPlayer(id);
+            SaiyanForm form = player == null ? null : current(player);
+            if (player == null || form == null || player.isDead()) {
+                flying.remove(id);
+                continue;
+            }
+            int ticks = flying.merge(id, 1, Integer::sum);
+            if (player.isSneaking() || (ticks > 10 && player.isOnGround())) {
+                stopFlight(player);
+                continue;
+            }
+            if (!player.isGliding()) {
+                player.setGliding(true);
+            }
+
+            // Ease towards the target speed, so turning feels smooth like an elytra
+            Vector target = player.getLocation().getDirection().multiply(form.flightSpeed());
+            Vector velocity = player.getVelocity().multiply(0.6).add(target.multiply(0.4));
+            player.setVelocity(velocity);
+
+            if (ticks % 2 == 0) {
+                player.getWorld().spawnParticle(Particle.DUST, player.getLocation().add(0, 0.5, 0), 4, 0.25, 0.25, 0.25, 0,
+                        new Particle.DustOptions(form.auraColor(), 1.6f));
+            }
         }
     }
 
